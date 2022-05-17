@@ -1,0 +1,46 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "7543afcb-f5af-44af-83c9-23164474c1e9": {
+      "ProjectGuid": "7543afcb-f5af-44af-83c9-23164474c1e9",
+      "DisplayName": "UA Core Library",
+      "ColorIndex": 0
+    },
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": -1
+    },
+    "f8ada46b-f2ea-42d3-8860-06d9333e57e0": {
+      "ProjectGuid": "f8ada46b-f2ea-42d3-8860-06d9333e57e0",
+      "DisplayName": "Stack",
+      "ColorIndex": 1
+    },
+    "e16f908b-c338-4b0c-9e72-2adad8fb98d5": {
+      "ProjectGuid": "e16f908b-c338-4b0c-9e72-2adad8fb98d5",
+      "DisplayName": "UA Server Library",
+      "ColorIndex": 2
+    },
+    "b109ebae-bb08-40a7-bb9e-7e56b9151b17": {
+      "ProjectGuid": "b109ebae-bb08-40a7-bb9e-7e56b9151b17",
+      "DisplayName": "UA Sample Server",
+      "ColorIndex": 3
+    },
+    "42e9198c-ed2c-4bc8-b0a1-55d91d8f1e90": {
+      "ProjectGuid": "42e9198c-ed2c-4bc8-b0a1-55d91d8f1e90",
+      "DisplayName": "UA Client Library",
+      "ColorIndex": 4
+    },
+    "8ab4cb8e-e216-425d-b600-350d0b6b59cd": {
+      "ProjectGuid": "8ab4cb8e-e216-425d-b600-350d0b6b59cd",
+      "DisplayName": "UA Configuration Library",
+      "ColorIndex": 5
+    },
+    "c2a3557b-cc0b-4291-8aae-2c7ff44833e9": {
+      "ProjectGuid": "c2a3557b-cc0b-4291-8aae-2c7ff44833e9",
+      "DisplayName": "Opc.Ua.Publisher",
+      "ColorIndex": 6
+    }
+  },
+  "NextColorIndex": 7
+}

@@ -29,6 +29,7 @@ using System.Runtime.Serialization;
 using System.IO;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
+using System.Net;
 
 namespace Opc.Ua
 {
@@ -2968,6 +2969,102 @@ namespace Opc.Ua
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Normalize ipv4/ipv6 address for comparisons.
+        /// </summary>
+        public static string NormalizedIPAddress(string ipAddress)
+        {
+            try
+            {
+                IPAddress normalizedAddress = IPAddress.Parse(ipAddress);
+                return normalizedAddress.ToString();
+            }
+            catch
+            {
+                return ipAddress;
+            }
+        }
+
+        /// <inheritdoc cref="Dns.GetHostName"/>
+        /// <remarks>If the platform returns a FQDN, only the host name is returned.</remarks>
+        public static string GetHostName()
+        {
+            return Dns.GetHostName().Split('.')[0].ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Get the FQDN of the local computer.
+        /// </summary>
+        public static string GetFullQualifiedDomainName()
+        {
+            string domainName = null;
+            try
+            {
+                domainName = Dns.GetHostEntry("localhost").HostName;
+            }
+            catch
+            {
+            }
+            if (String.IsNullOrEmpty(domainName))
+            {
+                return Dns.GetHostName();
+            }
+            return domainName;
+        }
+        #endregion
+
+
+
+        #region Certificate Log Methods
+        /// <summary>
+        /// Formats and writes a log message for a certificate.
+        /// </summary>
+        /// <param name="message">The log message as string.</param>
+        /// <param name="certificate">The certificate information to be logged.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogCertificate(string message, X509Certificate2 certificate, params object[] args)
+        {
+            LogCertificate((int)TraceMasks.Information, message, certificate, args);
+        }
+
+        /// <summary>
+        /// Formats and writes a log message for a certificate.
+        /// </summary>
+        /// <param name="logLevel">Entry will be written on this level.</param>
+        /// <param name="message">The log message as string.</param>
+        /// <param name="certificate">The certificate information to be logged.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogCertificate(int logLevel, string message, X509Certificate2 certificate, params object[] args)
+        {
+            if (s_traceOutput != (int)TraceOutput.Off)
+            {
+                var builder = new StringBuilder()
+                    .Append(message);
+                if (certificate != null)
+                {
+                    int argsLength = args.Length;
+                    builder.Append(" [{");
+                    builder.Append(argsLength);
+                    builder.Append("}] [{");
+                    builder.Append(argsLength + 1);
+                    builder.Append("}]");
+                    object[] allArgs = new object[argsLength + 2];
+                    for (int i = 0; i < argsLength; i++)
+                    {
+                        allArgs[i] = args[i];
+                    }
+                    allArgs[argsLength] = certificate.Subject;
+                    allArgs[argsLength + 1] = certificate.Thumbprint;
+                    Trace(logLevel, builder.ToString(), allArgs);
+                }
+                else
+                {
+                    builder.Append(" (none)");
+                    Trace(logLevel, builder.ToString(), args);
+                }
+            }
         }
         #endregion
     }
