@@ -33,6 +33,7 @@ using System.Security.Cryptography;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using System.IO;
+using Opc.Ua.Security.Certificates.Common;
 
 namespace Opc.Ua.Security.Certificates.BouncyCastle
 {

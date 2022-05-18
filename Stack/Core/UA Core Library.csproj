@@ -123,7 +123,10 @@
     <Compile Include="Security\Certificates\CertificateValidator.cs" />
     <Compile Include="Security\Certificates\CertificateValidator2.cs" />
     <Compile Include="Security\Certificates\Common\AsnUtils.cs" />
+    <Compile Include="Security\Certificates\Common\HashAlgorithmName.cs" />
     <Compile Include="Security\Certificates\Common\Oids.cs" />
+    <Compile Include="Security\Certificates\Common\RSASignaturePadding.cs" />
+    <Compile Include="Security\Certificates\Common\RSASignaturePaddingMode.cs" />
     <Compile Include="Security\Certificates\Common\X509Defaults.cs" />
     <Compile Include="Security\Certificates\DirectoryCertificateStore.cs" />
     <Compile Include="Security\Certificates\EncryptedData.cs" />
@@ -143,8 +146,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Security\AccessControl\AccessTemplateManager.cs" />
+    <Compile Include="Security\Certificates\System.Security.Cryptography.X509Certificates\RSAPkcs1X509SignatureGenerator.cs" />
+    <Compile Include="Security\Certificates\System.Security.Cryptography.X509Certificates\X509SignatureGenerator.cs" />
     <Compile Include="Security\Certificates\Win32.cs" />
     <Compile Include="Security\Certificates\WindowsCertificateStore.cs" />
+    <Compile Include="Security\Certificates\X509Certificate\CertificateBuilder.cs" />
+    <Compile Include="Security\Certificates\X509Certificate\CertificateBuilderBase.cs" />
+    <Compile Include="Security\Certificates\X509Certificate\ICertificateBuilder.cs" />
+    <Compile Include="Security\Certificates\X509Certificate\IX509Certificate.cs" />
+    <Compile Include="Security\Certificates\X509Certificate\X509PfxUtils.cs" />
     <Compile Include="Security\Certificates\X509CRL.cs" />
     <Compile Include="Security\Certificates\X509SubjectAltNameExtension.cs" />
     <Compile Include="Security\Certificates\X509Utils.cs" />
@@ -389,6 +399,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

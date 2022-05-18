@@ -27,11 +27,16 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Math;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using X509Extension = System.Security.Cryptography.X509Certificates.X509Extension;
 
 namespace Opc.Ua.Security.Certificates
 {
@@ -263,41 +268,19 @@ namespace Opc.Ua.Security.Certificates
         #region Private Methods
         private byte[] Encode()
         {
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
-            writer.PushSequence();
+            MemoryStream memoryStream = new MemoryStream();
+            DerSequenceGenerator writer = new DerSequenceGenerator(memoryStream);
 
-            if (m_keyIdentifier != null)
-            {
-                Asn1Tag keyIdTag = new Asn1Tag(TagClass.ContextSpecific, 0);
-                writer.WriteOctetString(m_keyIdentifier, keyIdTag);
-            }
+            X509Name issuerName = new X509Name(m_issuer.Name);
 
-            if (m_issuer != null)
-            {
-                Asn1Tag issuerNameTag = new Asn1Tag(TagClass.ContextSpecific, 1);
-                writer.PushSequence(issuerNameTag);
+            AuthorityKeyIdentifier authorityKeyIdentifier = new AuthorityKeyIdentifier(
+                m_keyIdentifier,
+                GeneralNames.GetInstance(new DerSequence(issuerName)),
+                new BigInteger(m_serialNumberByteArray));
 
-                // Add the issuer to constructed context-specific 4 (GeneralName.directoryName)
-                // NOTE: rewrite using sequence
-                // X.680 2015-08 31.2.7: "The tagging construction specifies explicit tagging if any of the following holds:
-                // ... (c) ... the type defined by "Type" is an untagged choice type, ... "
-                // Since this is a Context-Specific tag the output is the same
-                Asn1Tag directoryNameTag = new Asn1Tag(TagClass.ContextSpecific, 4, true);
-                writer.PushSetOf(directoryNameTag);
-                writer.WriteEncodedValue(m_issuer.RawData);
-                writer.PopSetOf(directoryNameTag);
-                writer.PopSequence(issuerNameTag);
-            }
-
-            if (m_serialNumber != null)
-            {
-                Asn1Tag issuerSerialTag = new Asn1Tag(TagClass.ContextSpecific, 2);
-                BigInteger issuerSerial = new BigInteger(m_serialNumber);
-                writer.WriteInteger(issuerSerial, issuerSerialTag);
-            }
-
-            writer.PopSequence();
-            return writer.Encode();
+            writer.AddObject(authorityKeyIdentifier);
+            writer.Close();
+            return memoryStream.ToArray();
         }
 
 
@@ -348,53 +331,28 @@ namespace Opc.Ua.Security.Certificates
             {
                 try
                 {
-                    AsnReader dataReader = new AsnReader(data, AsnEncodingRules.DER);
-                    var akiReader = dataReader.ReadSequence();
-                    dataReader.ThrowIfNotEmpty();
-                    if (akiReader != null)
+                    Asn1StreamParser aIn = new Asn1StreamParser(data);
+                    Asn1SequenceParser dataReader = (Asn1SequenceParser)aIn.ReadObject();
+                    object o = dataReader.ReadObject();
+
+                    if (o is AuthorityKeyIdentifier authorityKeyIdentifier)
                     {
-                        Asn1Tag keyIdTag = new Asn1Tag(TagClass.ContextSpecific, 0);
-                        Asn1Tag dnameSequencyTag = new Asn1Tag(TagClass.ContextSpecific, 1, true);
-                        Asn1Tag serialNumberTag = new Asn1Tag(TagClass.ContextSpecific, 2);
-                        while (akiReader.HasData)
-                        {
-                            Asn1Tag peekTag = akiReader.PeekTag();
-                            if (peekTag == keyIdTag)
-                            {
-                                m_keyIdentifier = akiReader.ReadOctetString(keyIdTag);
-                                continue;
-                            }
-
-                            if (peekTag == dnameSequencyTag)
-                            {
-                                AsnReader issuerReader = akiReader.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 1));
-                                if (issuerReader != null)
-                                {
-                                    Asn1Tag directoryNameTag = new Asn1Tag(TagClass.ContextSpecific, 4, true);
-                                    m_issuer = new X500DistinguishedName(issuerReader.ReadSequence(directoryNameTag).ReadEncodedValue().ToArray());
-                                    issuerReader.ThrowIfNotEmpty();
-                                }
-                                continue;
-                            }
-
-                            if (peekTag == serialNumberTag)
-                            {
-                                m_serialNumber = akiReader.ReadInteger(serialNumberTag).ToByteArray();
-                                continue;
-                            }
-                            throw new AsnContentException("Unknown tag in sequence.");
-                        }
-                        akiReader.ThrowIfNotEmpty();
-                        return;
+                        m_keyIdentifier = authorityKeyIdentifier.GetKeyIdentifier();
+                        m_issuer = new X500DistinguishedName(authorityKeyIdentifier.AuthorityCertIssuer.GetDerEncoded());
+                        m_serialNumberByteArray = authorityKeyIdentifier.AuthorityCertSerialNumber.ToByteArray();
                     }
+                    else
+                    {
+                        throw new CryptographicException("Failed to decode the AuthorityKeyIdentifier extention; No valid data");
+                    }
+                
                     throw new CryptographicException("No valid data in the extension.");
                 }
-                catch (AsnContentException ace)
+                catch (Exception ace)
                 {
                     throw new CryptographicException("Failed to decode the AuthorityKeyIdentifier extension.", ace);
                 }
             }
-            throw new CryptographicException("Invalid AuthorityKeyIdentifierOid.");
         }
         #endregion
 

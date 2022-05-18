@@ -27,13 +27,14 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
-using System.Formats.Asn1;
 using System.Net;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using X509Extension = System.Security.Cryptography.X509Certificates.X509Extension;
 
 namespace Opc.Ua.Security.Certificates
 {
@@ -350,48 +351,52 @@ namespace Opc.Ua.Security.Certificates
                     List<string> uris = new List<string>();
                     List<string> domainNames = new List<string>();
                     List<string> ipAddresses = new List<string>();
-                    AsnReader dataReader = new AsnReader(data, AsnEncodingRules.DER);
-                    var akiReader = dataReader.ReadSequence();
-                    dataReader.ThrowIfNotEmpty();
-                    if (akiReader != null)
-                    {
-                        Asn1Tag uriTag = new Asn1Tag(TagClass.ContextSpecific, 6);
-                        Asn1Tag dnsTag = new Asn1Tag(TagClass.ContextSpecific, 2);
-                        Asn1Tag ipTag = new Asn1Tag(TagClass.ContextSpecific, 7);
 
-                        while (akiReader.HasData)
+                    Asn1StreamParser aIn = new Asn1StreamParser(data);
+                    Asn1SequenceParser dataReader = (Asn1SequenceParser)aIn.ReadObject();
+                    object o = dataReader.ReadObject();
+
+                    while (o != null)
+                    {
+                        if (o is GeneralName generalName)
                         {
-                            Asn1Tag peekTag = akiReader.PeekTag();
-                            if (peekTag == uriTag)
+                            switch (generalName.TagNo)
                             {
-                                var uri = akiReader.ReadCharacterString(UniversalTagNumber.IA5String, uriTag);
-                                uris.Add(uri);
-                            }
-                            else if (peekTag == dnsTag)
-                            {
-                                var dnsName = akiReader.ReadCharacterString(UniversalTagNumber.IA5String, dnsTag);
-                                domainNames.Add(dnsName);
-                            }
-                            else if (peekTag == ipTag)
-                            {
-                                var ip = akiReader.ReadOctetString(ipTag);
-                                ipAddresses.Add(IPAddressToString(ip));
-                            }
-                            else  // skip over
-                            {
-                                akiReader.ReadEncodedValue();
+                                case (GeneralName.UniformResourceIdentifier):
+                                    {
+                                        var uri = DerIA5String.GetInstance(generalName.Name).GetString();
+                                        uris.Add(uri);
+                                        break;
+                                    }
+                                case (GeneralName.DnsName):
+                                    {
+                                        var dnsName = DerIA5String.GetInstance(generalName.Name).GetString();
+                                        domainNames.Add(dnsName);
+                                        break;
+                                    }
+                                case (GeneralName.IPAddress):
+                                    {
+                                        var ip = DerIA5String.GetInstance(generalName.Name).GetString();
+                                        ipAddresses.Add(ip);
+                                        break;
+                                    }
                             }
                         }
-                        akiReader.ThrowIfNotEmpty();
-                        m_uris = uris;
-                        m_domainNames = domainNames;
-                        m_ipAddresses = ipAddresses;
-                        m_decoded = true;
-                        return;
+                        else
+                        {
+                            throw new CryptographicException("Failed to decode the X509 signature; No valid data in the X509 signature.");
+                        }
+                        o = dataReader.ReadObject();
                     }
-                    throw new CryptographicException("No valid data in the X509 signature.");
+
+                    m_uris = uris;
+                    m_domainNames = domainNames;
+                    m_ipAddresses = ipAddresses;
+                    m_decoded = true;
+                    return;
+
                 }
-                catch (AsnContentException ace)
+                catch (Exception ace)
                 {
                     throw new CryptographicException("Failed to decode the SubjectAltName extension.", ace);
                 }
@@ -399,6 +404,7 @@ namespace Opc.Ua.Security.Certificates
             throw new CryptographicException("Invalid SubjectAltNameOid.");
         }
 
+      
         /// <summary>
         /// Initialize the Subject Alternative name extension.
         /// </summary>

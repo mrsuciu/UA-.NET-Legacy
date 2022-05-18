@@ -28,11 +28,12 @@
  * ======================================================================*/
 
 using System;
-using System.Formats.Asn1;
-using System.Numerics;
+using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Math;
 
 namespace Opc.Ua.Security.Certificates
 {
@@ -136,9 +137,11 @@ namespace Opc.Ua.Security.Certificates
         /// </summary>
         private byte[] Encode()
         {
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
-            writer.WriteInteger(CrlNumber);
-            return writer.Encode();
+            MemoryStream memoryStream = new MemoryStream();
+            DerSequenceGenerator writer = new DerSequenceGenerator(memoryStream);
+            writer.AddObject(new DerInteger(CrlNumber.ToByteArray()));
+            writer.Close();
+            return memoryStream.ToArray();
         }
 
         /// <summary>
@@ -150,11 +153,27 @@ namespace Opc.Ua.Security.Certificates
             {
                 try
                 {
-                    AsnReader dataReader = new AsnReader(data, AsnEncodingRules.DER);
-                    CrlNumber = dataReader.ReadInteger();
-                    dataReader.ThrowIfNotEmpty();
+                    Asn1StreamParser aIn = new Asn1StreamParser(data);
+                    Asn1SequenceParser dataReader = (Asn1SequenceParser)aIn.ReadObject();
+                    object o = dataReader.ReadObject();
+
+                    if (o != null)
+                    {
+                        if (o is BigInteger bigInt)
+                        {
+                            CrlNumber = bigInt;
+                        }
+                        else
+                        {
+                            throw new CryptographicException("Failed to decode the CRL Number extension, not a BigInteger");
+                        }
+                    }
+                    else
+                    {
+                        throw new CryptographicException("Failed to decode the CRL Number extension, decoded CrlNumber returned null");
+                    }
                 }
-                catch (AsnContentException ace)
+                catch (Exception ace)
                 {
                     throw new CryptographicException("Failed to decode the CRL Number extension.", ace);
                 }
