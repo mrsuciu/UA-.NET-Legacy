@@ -28,6 +28,9 @@
  * ======================================================================*/
 
 using Opc.Ua.Security.Certificates.Common;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto;
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -73,50 +76,50 @@ namespace Opc.Ua.Security.Certificates
         /// <param name="tbs">The data to be signed.</param>
         /// <param name="signature">The signature of the data.</param>
         /// <param name="signatureAlgorithmIdentifier">The algorithm used to create the signature.</param>
-        public X509Signature(byte[] tbs, byte[] signature, byte[] signatureAlgorithmIdentifier)
-        {
-            Tbs = tbs;
-            Signature = signature;
-            SignatureAlgorithmIdentifier = signatureAlgorithmIdentifier;
-            SignatureAlgorithm = DecodeAlgorithm(signatureAlgorithmIdentifier);
-            Name = Oids.GetHashAlgorithmName(SignatureAlgorithm);
-        }
+        //public X509Signature(byte[] tbs, byte[] signature, byte[] signatureAlgorithmIdentifier)
+        //{
+        //    Tbs = tbs;
+        //    Signature = signature;
+        //    SignatureAlgorithmIdentifier = signatureAlgorithmIdentifier;
+        //    SignatureAlgorithm = DecodeAlgorithm(signatureAlgorithmIdentifier);
+        //    Name = Oids.GetHashAlgorithmName(SignatureAlgorithm);
+        //}
 
         /// <summary>
         /// Encode Tbs with a signature in ASN format.
         /// </summary>
         /// <returns>X509 ASN format of EncodedData+SignatureOID+Signature bytes.</returns>
-        public byte[] Encode()
-        {
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+        //public byte[] Encode()
+        //{
+        //    AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
 
-            var tag = Asn1Tag.Sequence;
-            writer.PushSequence(tag);
+        //    var tag = Asn1Tag.Sequence;
+        //    writer.PushSequence(tag);
 
-            // write Tbs encoded data
-            writer.WriteEncodedValue(Tbs);
+        //    // write Tbs encoded data
+        //    writer.WriteEncodedValue(Tbs);
 
-            // Signature Algorithm Identifier
-            if (SignatureAlgorithmIdentifier != null)
-            {
-                writer.WriteEncodedValue(SignatureAlgorithmIdentifier);
-            }
-            else
-            {
-                writer.PushSequence();
-                string signatureAlgorithmIdentifier = Oids.GetRSAOid(Name);
-                writer.WriteObjectIdentifier(signatureAlgorithmIdentifier);
-                writer.WriteNull();
-                writer.PopSequence();
-            }
+        //    // Signature Algorithm Identifier
+        //    if (SignatureAlgorithmIdentifier != null)
+        //    {
+        //        writer.WriteEncodedValue(SignatureAlgorithmIdentifier);
+        //    }
+        //    else
+        //    {
+        //        writer.PushSequence();
+        //        string signatureAlgorithmIdentifier = Oids.GetRSAOid(Name);
+        //        writer.WriteObjectIdentifier(signatureAlgorithmIdentifier);
+        //        writer.WriteNull();
+        //        writer.PopSequence();
+        //    }
 
-            // Add signature
-            writer.WriteBitString(Signature);
+        //    // Add signature
+        //    writer.WriteBitString(Signature);
 
-            writer.PopSequence(tag);
+        //    writer.PopSequence(tag);
 
-            return writer.Encode();
-        }
+        //    return writer.Encode();
+        //}
 
         /// <summary>
         /// Decoder for the signature sequence.
@@ -126,31 +129,23 @@ namespace Opc.Ua.Security.Certificates
         {
             try
             {
-                AsnReader crlReader = new AsnReader(crl, AsnEncodingRules.DER);
-                var seqReader = crlReader.ReadSequence(Asn1Tag.Sequence);
-                if (seqReader != null)
+                X509CertificateStructure x509CertificateStructure = X509CertificateStructure.GetInstance(crl);
+                if (x509CertificateStructure != null)
                 {
                     // Tbs encoded data
-                    Tbs = seqReader.ReadEncodedValue().ToArray();
+                    Tbs = x509CertificateStructure.TbsCertificate.GetEncoded();
 
                     // Signature Algorithm Identifier
-                    var sigOid = seqReader.ReadSequence();
-                    SignatureAlgorithm = sigOid.ReadObjectIdentifier();
+                    SignatureAlgorithm = x509CertificateStructure.SignatureAlgorithm.Algorithm.ToString();
                     Name = Oids.GetHashAlgorithmName(SignatureAlgorithm);
 
-                    // Signature
-                    int unusedBitCount;
-                    Signature = seqReader.ReadBitString(out unusedBitCount);
-                    if (unusedBitCount != 0)
-                    {
-                        throw new AsnContentException("Unexpected data in signature.");
-                    }
-                    seqReader.ThrowIfNotEmpty();
+                    //Signature
+                    Signature = x509CertificateStructure.GetSignatureOctets();
                     return;
                 }
                 throw new CryptographicException("No valid data in the X509 signature.");
             }
-            catch (AsnContentException ace)
+            catch (CryptographicException ace)
             {
                 throw new CryptographicException("Failed to decode the X509 signature.", ace);
             }
@@ -187,9 +182,15 @@ namespace Opc.Ua.Security.Certificates
         /// </summary>
         private bool VerifyForRSA(X509Certificate2 certificate, RSASignaturePadding padding)
         {
-            using (RSA rsa = certificate.GetRSAPublicKey())
+            try
             {
-                return rsa.VerifyData(Tbs, Signature, Name, padding);
+                Org.BouncyCastle.X509.X509Certificate cert = new Org.BouncyCastle.X509.X509Certificate(certificate.RawData);
+                cert.Verify(cert.GetPublicKey());
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new CryptographicException("Failed to verify RSA signature.", e);
             }
         }
 
@@ -198,10 +199,15 @@ namespace Opc.Ua.Security.Certificates
         /// </summary>
         private bool VerifyForECDsa(X509Certificate2 certificate)
         {
-            using (ECDsa key = certificate.GetECDsaPublicKey())
+            try
             {
-                var decodedSignature = DecodeECDsa(Signature, key.KeySize);
-                return key.VerifyData(Tbs, decodedSignature, Name);
+                Org.BouncyCastle.X509.X509Certificate cert = new Org.BouncyCastle.X509.X509Certificate(certificate.RawData);
+                cert.Verify(cert.GetPublicKey());
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new CryptographicException("Failed to verify ECD signature.", e);
             }
         }
 
@@ -210,70 +216,70 @@ namespace Opc.Ua.Security.Certificates
         /// </summary>
         /// <param name="oid">The ASN.1 encoded algorithm oid.</param>
         /// <returns></returns>
-        private string DecodeAlgorithm(byte[] oid)
-        {
-            var seqReader = new AsnReader(oid, AsnEncodingRules.DER);
-            var sigOid = seqReader.ReadSequence();
-            seqReader.ThrowIfNotEmpty();
-            var result = sigOid.ReadObjectIdentifier();
-            if (sigOid.HasData)
-            {
-                sigOid.ReadNull();
-            }
-            sigOid.ThrowIfNotEmpty();
-            return result;
-        }
+        //private string DecodeAlgorithm(byte[] oid)
+        //{
+        //    var seqReader = new AsnReader(oid, AsnEncodingRules.DER);
+        //    var sigOid = seqReader.ReadSequence();
+        //    seqReader.ThrowIfNotEmpty();
+        //    var result = sigOid.ReadObjectIdentifier();
+        //    if (sigOid.HasData)
+        //    {
+        //        sigOid.ReadNull();
+        //    }
+        //    sigOid.ThrowIfNotEmpty();
+        //    return result;
+        //}
 
         /// <summary>
         /// Encode a ECDSA signature as ASN.1.
         /// </summary>
         /// <param name="signature">The signature to encode as ASN.1</param>
-        private static byte[] EncodeECDsa(byte[] signature)
-        {
-            // Encode from IEEE signature format to ASN1 DER encoded 
-            // signature format for ecdsa certificates.
-            // ECDSA-Sig-Value ::= SEQUENCE { r INTEGER, s INTEGER }
-            AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
-            var tag = Asn1Tag.Sequence;
-            writer.PushSequence(tag);
+        //private static byte[] EncodeECDsa(byte[] signature)
+        //{
+        //    // Encode from IEEE signature format to ASN1 DER encoded 
+        //    // signature format for ecdsa certificates.
+        //    // ECDSA-Sig-Value ::= SEQUENCE { r INTEGER, s INTEGER }
+        //    AsnWriter writer = new AsnWriter(AsnEncodingRules.DER);
+        //    var tag = Asn1Tag.Sequence;
+        //    writer.PushSequence(tag);
 
-            int segmentLength = signature.Length / 2;
-            writer.WriteIntegerUnsigned(new ReadOnlySpan<byte>(signature, 0, segmentLength));
-            writer.WriteIntegerUnsigned(new ReadOnlySpan<byte>(signature, segmentLength, segmentLength));
+        //    int segmentLength = signature.Length / 2;
+        //    writer.WriteIntegerUnsigned(new ReadOnlySpan<byte>(signature, 0, segmentLength));
+        //    writer.WriteIntegerUnsigned(new ReadOnlySpan<byte>(signature, segmentLength, segmentLength));
 
-            writer.PopSequence(tag);
+        //    writer.PopSequence(tag);
 
-            return writer.Encode();
-        }
+        //    return writer.Encode();
+        //}
 
         /// <summary>
         /// Decode a ECDSA signature from ASN.1.
         /// </summary>
         /// <param name="signature">The signature to decode from ASN.1</param>
         /// <param name="keySize">The keySize in bits.</param>
-        private static byte[] DecodeECDsa(ReadOnlyMemory<byte> signature, int keySize)
-        {
-            AsnReader reader = new AsnReader(signature, AsnEncodingRules.DER);
-            var seqReader = reader.ReadSequence();
-            reader.ThrowIfNotEmpty();
-            var r = seqReader.ReadIntegerBytes();
-            var s = seqReader.ReadIntegerBytes();
-            seqReader.ThrowIfNotEmpty();
-            keySize >>= 3;
-            if (r.Span[0] == 0 && r.Length > keySize)
-            {
-                r = r.Slice(1);
-            }
-            if (s.Span[0] == 0 && s.Length > keySize)
-            {
-                s = s.Slice(1);
-            }
-            var result = new byte[2 * keySize];
-            int offset = keySize - r.Length;
-            r.CopyTo(new Memory<byte>(result, offset, r.Length));
-            offset = 2 * keySize - s.Length;
-            s.CopyTo(new Memory<byte>(result, offset, s.Length));
-            return result;
-        }
+        //private static byte[] DecodeECDsa(ReadOnlyMemory<byte> signature, int keySize)
+        //{
+        //    AsnReader reader = new AsnReader(signature, AsnEncodingRules.DER);
+        //    var seqReader = reader.ReadSequence();
+        //    reader.ThrowIfNotEmpty();
+        //    var r = seqReader.ReadIntegerBytes();
+        //    var s = seqReader.ReadIntegerBytes();
+        //    seqReader.ThrowIfNotEmpty();
+        //    keySize >>= 3;
+        //    if (r.Span[0] == 0 && r.Length > keySize)
+        //    {
+        //        r = r.Slice(1);
+        //    }
+        //    if (s.Span[0] == 0 && s.Length > keySize)
+        //    {
+        //        s = s.Slice(1);
+        //    }
+        //    var result = new byte[2 * keySize];
+        //    int offset = keySize - r.Length;
+        //    r.CopyTo(new Memory<byte>(result, offset, r.Length));
+        //    offset = 2 * keySize - s.Length;
+        //    s.CopyTo(new Memory<byte>(result, offset, s.Length));
+        //    return result;
+        //}
     }
 }
