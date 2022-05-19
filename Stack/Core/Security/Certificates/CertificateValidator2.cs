@@ -534,7 +534,7 @@ namespace Opc.Ua
                 {
                     X509Certificate2 trusted = store.FindByThumbprint(certificate.Thumbprint);
 
-                    if (Utils.IsEqual(trusted.RawData, certificate.RawData))
+                    if (trusted != null && Utils.IsEqual(trusted.RawData, certificate.RawData))
                     {
                         return new CertificateIdentifier(trusted, m_trustedCertificateStore.ValidationOptions);
                     }

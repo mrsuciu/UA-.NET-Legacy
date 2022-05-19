@@ -331,15 +331,19 @@ namespace Opc.Ua.Security.Certificates
             {
                 try
                 {
-                    Asn1StreamParser aIn = new Asn1StreamParser(data);
-                    Asn1SequenceParser dataReader = (Asn1SequenceParser)aIn.ReadObject();
-                    object o = dataReader.ReadObject();
-
-                    if (o is AuthorityKeyIdentifier authorityKeyIdentifier)
+                    Asn1Object obj = Asn1Object.FromByteArray(data);
+                    AuthorityKeyIdentifier authorityKeyIdentifier = AuthorityKeyIdentifier.GetInstance(obj);
+                    if (authorityKeyIdentifier != null)
                     {
                         m_keyIdentifier = authorityKeyIdentifier.GetKeyIdentifier();
-                        m_issuer = new X500DistinguishedName(authorityKeyIdentifier.AuthorityCertIssuer.GetDerEncoded());
-                        m_serialNumberByteArray = authorityKeyIdentifier.AuthorityCertSerialNumber.ToByteArray();
+                        if (authorityKeyIdentifier.AuthorityCertIssuer != null)
+                        {
+                            m_issuer = new X500DistinguishedName(authorityKeyIdentifier.AuthorityCertIssuer.GetDerEncoded());
+                        }
+                        if (authorityKeyIdentifier.AuthorityCertSerialNumber != null)
+                        {
+                            m_serialNumberByteArray = authorityKeyIdentifier.AuthorityCertSerialNumber.ToByteArray();
+                        }
                     }
                     else
                     {
