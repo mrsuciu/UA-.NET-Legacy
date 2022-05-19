@@ -344,13 +344,12 @@ namespace Opc.Ua.Security.Certificates
                         {
                             m_serialNumberByteArray = authorityKeyIdentifier.AuthorityCertSerialNumber.ToByteArray();
                         }
+                        return;
                     }
                     else
                     {
                         throw new CryptographicException("Failed to decode the AuthorityKeyIdentifier extention; No valid data");
                     }
-                
-                    throw new CryptographicException("No valid data in the extension.");
                 }
                 catch (Exception ace)
                 {
