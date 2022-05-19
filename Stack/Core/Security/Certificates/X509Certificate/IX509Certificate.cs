@@ -27,6 +27,7 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+using Opc.Ua.Security.Certificates.Common;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;

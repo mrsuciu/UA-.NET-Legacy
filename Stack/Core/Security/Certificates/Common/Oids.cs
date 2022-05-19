@@ -27,6 +27,7 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+using Opc.Ua.Security.Certificates.Common;
 using System;
 using System.Security.Cryptography;
 
@@ -128,6 +129,30 @@ namespace Opc.Ua.Security.Certificates
         /// The Oid string for CRL Distribution Point.
         /// </summary>
         public const string CRLDistributionPoint = "2.5.29.31";
+
+        /// <summary>
+        /// Get the hash algorithm used to sign a certificate.
+        /// </summary>
+        /// <param name="oid">The signature algorithm oid.</param>
+        public static HashAlgorithmName GetHashAlgorithmName(string oid)
+        {
+            switch (oid)
+            {
+                case Oids.ECDsaWithSha1:
+                case Oids.RsaPkcs1Sha1:
+                    return HashAlgorithmName.SHA1;
+                case Oids.ECDsaWithSha256:
+                case Oids.RsaPkcs1Sha256:
+                    return HashAlgorithmName.SHA256;
+                case Oids.ECDsaWithSha384:
+                case Oids.RsaPkcs1Sha384:
+                    return HashAlgorithmName.SHA384;
+                case Oids.ECDsaWithSha512:
+                case Oids.RsaPkcs1Sha512:
+                    return HashAlgorithmName.SHA512;
+            }
+            throw new NotSupportedException($"Hash algorithm {oid} is not supported. ");
+        }
 
     }
 }

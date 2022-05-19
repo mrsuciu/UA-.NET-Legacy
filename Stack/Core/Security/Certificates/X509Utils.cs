@@ -11,6 +11,7 @@
 */
 
 
+using Opc.Ua.Security.Certificates;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,14 +109,14 @@ namespace Opc.Ua
         /// <param name="certificate">The certificate</param>
         public static int GetRSAPublicKeySize(X509Certificate2 certificate)
         {
-            using (RSA rsaPublicKey = certificate.GetRSAPublicKey())
+            PublicKey rsaPublicKey = certificate.PublicKey;
+            
+            if (rsaPublicKey != null)
             {
-                if (rsaPublicKey != null)
-                {
-                    return rsaPublicKey.KeySize;
-                }
-                return -1;
+                return rsaPublicKey.Key.KeySize;
             }
+            return -1;
+            
         }
 
         /// <summary>
@@ -464,13 +465,13 @@ namespace Opc.Ua
         /// <summary>
         /// Verify RSA key pair of two certificates.
         /// </summary>
-        public static bool VerifyRSAKeyPair(
-            X509Certificate2 certWithPublicKey,
-            X509Certificate2 certWithPrivateKey,
-            bool throwOnError = false)
-        {
-            return X509PfxUtils.VerifyRSAKeyPair(certWithPublicKey, certWithPrivateKey, throwOnError);
-        }
+        //public static bool VerifyRSAKeyPair(
+        //    X509Certificate2 certWithPublicKey,
+        //    X509Certificate2 certWithPrivateKey,
+        //    bool throwOnError = false)
+        //{
+        //    return X509PfxUtils.VerifyRSAKeyPair(certWithPublicKey, certWithPrivateKey, throwOnError);
+        //}
 
         /// <summary>
         /// Verify the signature of a self signed certificate.
@@ -494,23 +495,23 @@ namespace Opc.Ua
         /// <param name="rawData">The raw PKCS #12 store data.</param>
         /// <param name="password">The password to use to access the store.</param>
         /// <returns>The certificate with a private key.</returns>
-        public static X509Certificate2 CreateCertificateFromPKCS12(
-            byte[] rawData,
-            string password
-            )
-        {
-            return X509PfxUtils.CreateCertificateFromPKCS12(rawData, password);
-        }
+        //public static X509Certificate2 CreateCertificateFromPKCS12(
+        //    byte[] rawData,
+        //    string password
+        //    )
+        //{
+        //    return X509PfxUtils.CreateCertificateFromPKCS12(rawData, password);
+        //}
 
         /// <summary>
         /// Get the certificate by issuer and serial number.
         /// </summary>
-        public static async Task<X509Certificate2> FindIssuerCABySerialNumberAsync(
+        public static X509Certificate2 FindIssuerCABySerialNumberAsync(
             ICertificateStore store,
             X500DistinguishedName issuer,
             string serialnumber)
         {
-            X509Certificate2Collection certificates = await store.Enumerate().ConfigureAwait(false);
+            X509Certificate2Collection certificates = store.Enumerate();
 
             foreach (var certificate in certificates)
             {
@@ -536,28 +537,28 @@ namespace Opc.Ua
         /// <param name="storePath">The store path (syntax depends on storeType).</param>
         /// <param name="password">The password to use to protect the certificate.</param>
         /// <returns></returns>
-        public static X509Certificate2 AddToStore(
-            this X509Certificate2 certificate,
-            string storeType,
-            string storePath,
-            string password = null)
-        {
-            // add cert to the store.
-            if (!String.IsNullOrEmpty(storePath) && !String.IsNullOrEmpty(storeType))
-            {
-                using (ICertificateStore store = Opc.Ua.CertificateStoreIdentifier.CreateStore(storeType))
-                {
-                    if (store == null)
-                    {
-                        throw new ArgumentException("Invalid store type");
-                    }
+        //public static X509Certificate2 AddToStore(
+        //    this X509Certificate2 certificate,
+        //    string storeType,
+        //    string storePath,
+        //    string password = null)
+        //{
+        //    // add cert to the store.
+        //    if (!String.IsNullOrEmpty(storePath) && !String.IsNullOrEmpty(storeType))
+        //    {
+        //        using (ICertificateStore store = Opc.Ua.CertificateStoreIdentifier.CreateStore(storeType))
+        //        {
+        //            if (store == null)
+        //            {
+        //                throw new ArgumentException("Invalid store type");
+        //            }
 
-                    store.Open(storePath, false);
-                    store.Add(certificate, password).Wait();
-                    store.Close();
-                }
-            }
-            return certificate;
-        }
+        //            store.Open(storePath, false);
+        //            store.Add(certificate, password).Wait();
+        //            store.Close();
+        //        }
+        //    }
+        //    return certificate;
+        //}
     }
 }

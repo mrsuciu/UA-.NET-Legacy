@@ -27,6 +27,7 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+using Opc.Ua.Security.Certificates.Common;
 using System.Security.Cryptography;
 
 namespace Opc.Ua.Security.Certificates
@@ -51,6 +52,13 @@ namespace Opc.Ua.Security.Certificates
         /// The max supported size for a RSA key.
         /// </summary>
         public static readonly ushort RSAKeySizeMax = 4096;
+        /// <summary>
+        /// The default hash algorithm to use for signatures.
+        /// </summary>
+        /// <remarks>
+        /// Supported values are SHA-1(deprecated) or 256, 384 and 512 for SHA-2.
+        /// </remarks>
+        public static readonly HashAlgorithmName HashAlgorithmName = HashAlgorithmName.SHA256;
         /// <summary>
         /// The default lifetime of certificates in months.
         /// </summary>

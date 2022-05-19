@@ -133,11 +133,6 @@
     <Compile Include="Security\Certificates\ICertificate.cs" />
     <Compile Include="Security\Certificates\ICertificateStore.cs" />
     <Compile Include="Security\Certificates\ICertificateValidator.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\CertificateBuilder.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\CertificateFactoryRandomGenerator.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\CertificateFactoryX509Name.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\PEMReader.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\PEMWriter.cs" />
     <Compile Include="Security\Certificates\Org.BouncyCastle\X509Extensions.cs" />
     <Compile Include="Security\Certificates\Org.BouncyCastle\X509SignatureFactory.cs" />
     <Compile Include="Security\Certificates\Org.BouncyCastle\X509Utils.cs" />
@@ -154,8 +149,8 @@
     <Compile Include="Security\Certificates\X509Certificate\CertificateBuilderBase.cs" />
     <Compile Include="Security\Certificates\X509Certificate\ICertificateBuilder.cs" />
     <Compile Include="Security\Certificates\X509Certificate\IX509Certificate.cs" />
-    <Compile Include="Security\Certificates\X509Certificate\X509PfxUtils.cs" />
     <Compile Include="Security\Certificates\X509CRL.cs" />
+    <Compile Include="Security\Certificates\X509Crl\X509Signature.cs" />
     <Compile Include="Security\Certificates\X509SubjectAltNameExtension.cs" />
     <Compile Include="Security\Certificates\X509Utils.cs" />
     <Compile Include="Security\Constants\SecurityConstants.cs" />

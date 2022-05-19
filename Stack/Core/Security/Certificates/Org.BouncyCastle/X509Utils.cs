@@ -105,38 +105,38 @@ namespace Opc.Ua.Security.Certificates.BouncyCastle
         /// <summary>
         /// Get public key parameters from a X509Certificate2
         /// </summary>
-        internal static RsaKeyParameters GetPublicKeyParameter(X509Certificate2 certificate)
-        {
-            using (RSA rsa = certificate.GetRSAPublicKey())
-            {
-                return GetPublicKeyParameter(rsa);
-            }
-        }
+        //internal static RsaKeyParameters GetPublicKeyParameter(X509Certificate2 certificate)
+        //{
+        //    using (RSA rsa = certificate.GetRSAPublicKey())
+        //    {
+        //        return GetPublicKeyParameter(rsa);
+        //    }
+        //}
 
         /// <summary>
         /// Get public key parameters from a RSA.
         /// </summary>
-        internal static RsaKeyParameters GetPublicKeyParameter(RSA rsa)
-        {
-            RSAParameters rsaParams = rsa.ExportParameters(false);
-            return new RsaKeyParameters(
-                false,
-                new BigInteger(1, rsaParams.Modulus),
-                new BigInteger(1, rsaParams.Exponent));
-        }
+        //internal static RsaKeyParameters GetPublicKeyParameter(RSA rsa)
+        //{
+        //    RSAParameters rsaParams = rsa.ExportParameters(false);
+        //    return new RsaKeyParameters(
+        //        false,
+        //        new BigInteger(1, rsaParams.Modulus),
+        //        new BigInteger(1, rsaParams.Exponent));
+        //}
 
         /// <summary>
         /// Get private key parameters from a X509Certificate2.
         /// The private key must be exportable.
         /// </summary>
-        internal static RsaPrivateCrtKeyParameters GetPrivateKeyParameter(X509Certificate2 certificate)
-        {
-            // try to get signing/private key from certificate passed in
-            using (RSA rsa = certificate.GetRSAPrivateKey())
-            {
-                return GetPrivateKeyParameter(rsa);
-            }
-        }
+        //internal static RsaPrivateCrtKeyParameters GetPrivateKeyParameter(X509Certificate2 certificate)
+        //{
+        //    // try to get signing/private key from certificate passed in
+        //    using (RSA rsa = certificate.GetRSAPrivateKey())
+        //    {
+        //        return GetPrivateKeyParameter(rsa);
+        //    }
+        //}
 
         /// <summary>
         /// Get private key parameters from a RSA private key.
