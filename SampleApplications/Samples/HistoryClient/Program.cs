@@ -108,7 +108,7 @@ namespace Opc.Ua.Sample
                 X509Certificate2 clientCertificate = configuration.SecurityConfiguration.ApplicationCertificate.Find();
 
                 // set up a callback to handle certificate validation errors.
-                configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidator_CertificateValidation);
+                configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation);
 
                 // Initialize the channel which will be created with the server.
                 ITransportChannel channel = SessionChannel.Create(
