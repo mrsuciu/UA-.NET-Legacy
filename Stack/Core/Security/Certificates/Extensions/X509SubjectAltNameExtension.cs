@@ -352,13 +352,11 @@ namespace Opc.Ua.Security.Certificates
                     List<string> domainNames = new List<string>();
                     List<string> ipAddresses = new List<string>();
 
-                    Asn1StreamParser aIn = new Asn1StreamParser(data);
-                    Asn1SequenceParser dataReader = (Asn1SequenceParser)aIn.ReadObject();
-                    object o = dataReader.ReadObject();
-
-                    while (o != null)
+                    Asn1Object obj = Asn1Object.FromByteArray(data);
+                    GeneralNames gnNames = GeneralNames.GetInstance(obj);
+                    if (gnNames != null)
                     {
-                        if (o is GeneralName generalName)
+                        foreach (GeneralName generalName in gnNames.GetNames())
                         {
                             switch (generalName.TagNo)
                             {
@@ -382,11 +380,6 @@ namespace Opc.Ua.Security.Certificates
                                     }
                             }
                         }
-                        else
-                        {
-                            throw new CryptographicException("Failed to decode the X509 signature; No valid data in the X509 signature.");
-                        }
-                        o = dataReader.ReadObject();
                     }
 
                     m_uris = uris;
@@ -394,7 +387,6 @@ namespace Opc.Ua.Security.Certificates
                     m_ipAddresses = ipAddresses;
                     m_decoded = true;
                     return;
-
                 }
                 catch (Exception ace)
                 {
