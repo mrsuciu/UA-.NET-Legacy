@@ -55,7 +55,7 @@ namespace Opc.Ua.Sample.Controls
 
             if (!configuration.SecurityConfiguration.AutoAcceptUntrustedCertificates)
             {
-                m_server.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidator_CertificateValidation);
+                m_server.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation);
             }
         }
         #endregion
@@ -103,7 +103,7 @@ namespace Opc.Ua.Sample.Controls
         /// <summary>
         /// Handles a certificate validation error.
         /// </summary>
-        void CertificateValidator_CertificateValidation(CertificateValidator validator, CertificateValidationEventArgs e)
+        void CertificateValidator_CertificateValidation(CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {
             try
             {

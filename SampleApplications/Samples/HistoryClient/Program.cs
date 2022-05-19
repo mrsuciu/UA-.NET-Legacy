@@ -323,7 +323,7 @@ namespace Opc.Ua.Sample
         /// that will come back to haunt the vendor in the future. Compliance tests by the OPC Foundation will
         /// fail products that silently accept untrusted certificates.
         /// </remarks>
-        static void CertificateValidator_CertificateValidation(CertificateValidator validator, CertificateValidationEventArgs e)
+        static void CertificateValidator_CertificateValidation(CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {
             e.Accept = true;
             Console.WriteLine("WARNING: Accepting Untrusted Certificate: {0}", e.Certificate.Subject);

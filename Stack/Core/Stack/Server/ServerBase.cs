@@ -559,11 +559,11 @@ namespace Opc.Ua
         /// The object used to verify client certificates
         /// </summary>
         /// <value>The identifier for an X509 certificate.</value>
-        public CertificateValidator CertificateValidator
+        public CertificateValidator2 CertificateValidator
         {
             get 
             { 
-                return (CertificateValidator)m_certificateValidator; 
+                return (CertificateValidator2)m_certificateValidator; 
             }
             
             private set 

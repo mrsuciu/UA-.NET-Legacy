@@ -72,7 +72,7 @@ namespace Opc.Ua.Sample
 
             if (!application.ApplicationConfiguration.SecurityConfiguration.AutoAcceptUntrustedCertificates)
             {
-                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidator_CertificateValidation);
+                application.ApplicationConfiguration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation);
             }
 
             TrayIcon.Text = this.Text = application.ApplicationName;
@@ -120,7 +120,7 @@ namespace Opc.Ua.Sample
         /// <summary>
         /// Handles a certificate validation error.
         /// </summary>
-        void CertificateValidator_CertificateValidation(CertificateValidator validator, CertificateValidationEventArgs e)
+        void CertificateValidator_CertificateValidation(CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {
             try
             {

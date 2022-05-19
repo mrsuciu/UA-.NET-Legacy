@@ -88,7 +88,7 @@ namespace Opc.Ua.ServerTest
 
             GuiUtils.OverrideUaTcpImplementation(m_configuration);
 
-            m_configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidator_CertificateValidation);
+            m_configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation);
             ServerTestConfiguration m_testConfiguration = ServerTestConfiguration.Load(m_configuration.Extensions);
 
             m_testConfiguration.Coverage = 30;
@@ -190,7 +190,7 @@ namespace Opc.Ua.ServerTest
         /// <summary>
         /// Accepts server certificates.
         /// </summary>
-        static void CertificateValidator_CertificateValidation(CertificateValidator validator, CertificateValidationEventArgs e)
+        static void CertificateValidator_CertificateValidation(CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {
             // always safe to trust servers when connecting as a test application.
             e.Accept = true;

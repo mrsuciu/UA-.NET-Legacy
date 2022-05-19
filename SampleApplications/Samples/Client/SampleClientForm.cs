@@ -63,15 +63,15 @@ namespace Opc.Ua.Sample
 
             if (!configuration.SecurityConfiguration.AutoAcceptUntrustedCertificates)
             {
-                configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidator_CertificateValidation);
+                configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation);
             }
         }
 
-        void CertificateValidator_CertificateValidation(CertificateValidator validator, CertificateValidationEventArgs e)
+        void CertificateValidator_CertificateValidation(CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {
             if (InvokeRequired)
             {
-                Invoke(new CertificateValidationEventHandler(CertificateValidator_CertificateValidation), validator, e);
+                Invoke(new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation), validator, e);
                 return;
             }
 

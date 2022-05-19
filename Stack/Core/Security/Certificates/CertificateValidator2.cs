@@ -14,6 +14,7 @@ using Opc.Ua.Security.Certificates;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IdentityModel.Selectors;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -1181,9 +1182,9 @@ namespace Opc.Ua
         /// Returns an object that can be used with a UA channel.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public ICertificateValidator GetChannelValidator()
+        public X509CertificateValidator GetChannelValidator()
         {
-            return this;
+            return new WcfValidatorWrapper(this);
         }
 
         /// <summary>
@@ -1492,6 +1493,45 @@ namespace Opc.Ua
             RejectUnknownRevocationStatus = 4,
             MinimumCertificateKeySize = 8
         };
+        #endregion
+
+        #region WcfValidatorWrapper Class
+        /// <summary>
+        /// Wraps a WCF validator so the validator can be used in WCF bindings.
+        /// </summary>
+        internal class WcfValidatorWrapper : X509CertificateValidator
+        {
+            public WcfValidatorWrapper(CertificateValidator2 validator)
+            {
+                m_validator = validator;
+            }
+
+            public override void Validate(X509Certificate2 certificate)
+            {
+                try
+                {
+                    m_validator.Validate(certificate);
+                }
+                catch (Exception e)
+                {
+                    throw new System.IdentityModel.Tokens.SecurityTokenValidationException("Could not validate certificate.", e);
+                }
+            }
+
+            internal void Validate(X509Certificate2Collection certificates)
+            {
+                try
+                {
+                    m_validator.Validate(certificates);
+                }
+                catch (Exception e)
+                {
+                    throw new System.IdentityModel.Tokens.SecurityTokenValidationException("Could not validate certificate.", e);
+                }
+            }
+
+            private CertificateValidator2 m_validator;
+        }
         #endregion
 
         #region Private Fields

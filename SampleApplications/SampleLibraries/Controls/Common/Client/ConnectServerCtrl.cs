@@ -52,7 +52,7 @@ namespace Opc.Ua.Client.Controls
         public ConnectServerCtrl()
         {
             InitializeComponent();
-            m_CertificateValidation = new CertificateValidationEventHandler(CertificateValidator_CertificateValidation);
+            m_CertificateValidation = new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation);
         }
         #endregion
 
@@ -61,7 +61,7 @@ namespace Opc.Ua.Client.Controls
         private Session m_session;
         private int m_reconnectPeriod = 10;
         private SessionReconnectHandler m_reconnectHandler;
-        private CertificateValidationEventHandler m_CertificateValidation;
+        private CertificateValidationEventHandler2 m_CertificateValidation;
         private EventHandler m_ReconnectComplete;
         private EventHandler m_ReconnectStarting;
         private EventHandler m_KeepAliveComplete;
@@ -546,11 +546,11 @@ namespace Opc.Ua.Client.Controls
         /// <summary>
         /// Handles a certificate validation error.
         /// </summary>
-        private void CertificateValidator_CertificateValidation(CertificateValidator sender, CertificateValidationEventArgs e)
+        private void CertificateValidator_CertificateValidation(CertificateValidator2 sender, CertificateValidationEventArgs2 e)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new CertificateValidationEventHandler(CertificateValidator_CertificateValidation), sender, e);
+                this.Invoke(new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation), sender, e);
                 return;
             }
 

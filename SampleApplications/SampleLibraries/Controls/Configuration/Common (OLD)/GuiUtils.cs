@@ -280,7 +280,7 @@ namespace Opc.Ua.Client.Controls
         /// <param name="caller">The caller's text is used as the caption of the <see cref="MessageBox"/> shown to provide details about the error.</param>
         /// <param name="validator">The validator (not used).</param>
         /// <param name="e">The <see cref="Opc.Ua.CertificateValidationEventArgs"/> instance event arguments provided when a certificate validation error occurs.</param>
-        public static void HandleCertificateValidationError(Form caller, CertificateValidator validator, CertificateValidationEventArgs e)
+        public static void HandleCertificateValidationError(Form caller, CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {       
             StringBuilder buffer = new StringBuilder();
 
