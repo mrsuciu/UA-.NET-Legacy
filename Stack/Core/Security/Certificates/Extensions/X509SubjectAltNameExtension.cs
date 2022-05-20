@@ -107,6 +107,22 @@ namespace Opc.Ua.Security.Certificates
         {
             m_decoded = false;
         }
+
+        /// <summary>
+        /// Build the Subject Alternative name extension (for OPC UA application certs).
+        /// </summary>
+        /// <param name="applicationUri">The application Uri</param>
+        /// <param name="domainNames">The domain names. DNS Hostnames, IPv4 or IPv6 addresses</param>
+        public X509SubjectAltNameExtension(
+            string applicationUri,
+            IEnumerable<string> domainNames)
+        {
+            Oid = new Oid(SubjectAltName2Oid, kFriendlyName);
+            Critical = false;
+            Initialize(applicationUri, domainNames);
+            RawData = Encode();
+            m_decoded = true;
+        }
         #endregion
 
         #region Overridden Methods
@@ -299,7 +315,13 @@ namespace Opc.Ua.Security.Certificates
             }
         }
 #else  
-
+        /// <summary>
+        /// Encode the Subject Alternative name extension.
+        /// </summary>
+        private byte[] Encode()
+        {
+            return BouncyCastle.X509Extensions.BuildSubjectAltNameExtension(m_uris, m_domainNames, m_ipAddresses).RawData;
+        }
 #endif
 
         /// <summary>
