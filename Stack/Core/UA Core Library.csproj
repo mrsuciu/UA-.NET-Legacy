@@ -141,14 +141,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Security\AccessControl\AccessTemplateManager.cs" />
-    <Compile Include="Security\Certificates\System.Security.Cryptography.X509Certificates\RSAPkcs1X509SignatureGenerator.cs" />
     <Compile Include="Security\Certificates\System.Security.Cryptography.X509Certificates\X509SignatureGenerator.cs" />
     <Compile Include="Security\Certificates\Win32.cs" />
     <Compile Include="Security\Certificates\WindowsCertificateStore.cs" />
-    <Compile Include="Security\Certificates\X509Certificate\CertificateBuilder.cs" />
-    <Compile Include="Security\Certificates\X509Certificate\CertificateBuilderBase.cs" />
-    <Compile Include="Security\Certificates\X509Certificate\ICertificateBuilder.cs" />
-    <Compile Include="Security\Certificates\X509Certificate\IX509Certificate.cs" />
     <Compile Include="Security\Certificates\X509CRL.cs" />
     <Compile Include="Security\Certificates\X509Crl\X509Signature.cs" />
     <Compile Include="Security\Certificates\X509SubjectAltNameExtension.cs" />

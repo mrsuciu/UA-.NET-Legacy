@@ -463,17 +463,6 @@ namespace Opc.Ua
         }
 
         /// <summary>
-        /// Verify RSA key pair of two certificates.
-        /// </summary>
-        //public static bool VerifyRSAKeyPair(
-        //    X509Certificate2 certWithPublicKey,
-        //    X509Certificate2 certWithPrivateKey,
-        //    bool throwOnError = false)
-        //{
-        //    return X509PfxUtils.VerifyRSAKeyPair(certWithPublicKey, certWithPrivateKey, throwOnError);
-        //}
-
-        /// <summary>
         /// Verify the signature of a self signed certificate.
         /// </summary>
         public static bool VerifySelfSigned(X509Certificate2 cert)
@@ -488,20 +477,6 @@ namespace Opc.Ua
                 return false;
             }
         }
-
-        /// <summary>
-        /// Creates a certificate from a PKCS #12 store with a private key.
-        /// </summary>
-        /// <param name="rawData">The raw PKCS #12 store data.</param>
-        /// <param name="password">The password to use to access the store.</param>
-        /// <returns>The certificate with a private key.</returns>
-        //public static X509Certificate2 CreateCertificateFromPKCS12(
-        //    byte[] rawData,
-        //    string password
-        //    )
-        //{
-        //    return X509PfxUtils.CreateCertificateFromPKCS12(rawData, password);
-        //}
 
         /// <summary>
         /// Get the certificate by issuer and serial number.
@@ -524,41 +499,5 @@ namespace Opc.Ua
 
             return null;
         }
-
-        /// <summary>
-        /// Extension to add a certificate to a <see cref="ICertificateStore"/>.
-        /// </summary>
-        /// <remarks>
-        /// Saves also the private key, if available.
-        /// If written to a Pfx file, the password is used for protection.
-        /// </remarks>
-        /// <param name="certificate">The certificate to store.</param>
-        /// <param name="storeType">Type of certificate store (Directory) <see cref="CertificateStoreType"/>.</param>
-        /// <param name="storePath">The store path (syntax depends on storeType).</param>
-        /// <param name="password">The password to use to protect the certificate.</param>
-        /// <returns></returns>
-        //public static X509Certificate2 AddToStore(
-        //    this X509Certificate2 certificate,
-        //    string storeType,
-        //    string storePath,
-        //    string password = null)
-        //{
-        //    // add cert to the store.
-        //    if (!String.IsNullOrEmpty(storePath) && !String.IsNullOrEmpty(storeType))
-        //    {
-        //        using (ICertificateStore store = Opc.Ua.CertificateStoreIdentifier.CreateStore(storeType))
-        //        {
-        //            if (store == null)
-        //            {
-        //                throw new ArgumentException("Invalid store type");
-        //            }
-
-        //            store.Open(storePath, false);
-        //            store.Add(certificate, password).Wait();
-        //            store.Close();
-        //        }
-        //    }
-        //    return certificate;
-        //}
     }
 }

@@ -101,13 +101,5 @@ namespace Opc.Ua.Security.Certificates
                 return extensions.OfType<T>().FirstOrDefault();
             }
         }
-
-        /// <summary>
-        /// Patch serial number in a Url. string version.
-        /// </summary>
-        public static string PatchExtensionUrl(string extensionUrl, string serial)
-        {
-            return extensionUrl.Replace("%serial%", serial.ToLower());
-        }
     }
 }
