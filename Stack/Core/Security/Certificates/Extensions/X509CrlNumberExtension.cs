@@ -47,26 +47,12 @@ namespace Opc.Ua.Security.Certificates
     public class X509CrlNumberExtension : X509Extension
     {
         #region Constructors
-        /// <summary>
-        /// Creates an empty extension.
-        /// </summary>
-        protected X509CrlNumberExtension()
-        {
-        }
 
         /// <summary>
         /// Creates an extension from ASN.1 encoded data.
         /// </summary>
         public X509CrlNumberExtension(AsnEncodedData encodedExtension, bool critical)
             : this(encodedExtension.Oid, encodedExtension.RawData, critical)
-        {
-        }
-
-        /// <summary>
-        /// Creates an extension from an Oid and ASN.1 encoded raw data.
-        /// </summary>
-        public X509CrlNumberExtension(string oid, byte[] rawData, bool critical)
-            : this(new Oid(oid, kFriendlyName), rawData, critical)
         {
         }
 
@@ -79,43 +65,10 @@ namespace Opc.Ua.Security.Certificates
         {
             Decode(rawData);
         }
-
-        /// <summary>
-        /// Build the CRL Number extension (for CRL extensions).
-        /// </summary>
-        public X509CrlNumberExtension(BigInteger crlNumber)
-        {
-            Oid = new Oid(CrlNumberOid, kFriendlyName);
-            Critical = false;
-            CrlNumber = crlNumber;
-            RawData = Encode();
-        }
         #endregion
 
         #region Overridden Methods
-        /// <summary>
-        /// Returns a formatted version of the Abstract Syntax Notation One (ASN.1)-encoded data as a string.
-        /// </summary>
-        public override string Format(bool multiLine)
-        {
-            StringBuilder buffer = new StringBuilder();
-            buffer.Append(kFriendlyName);
-            buffer.Append('=');
-            buffer.Append(CrlNumber);
 
-            return buffer.ToString();
-        }
-
-        /// <summary>
-        /// Initializes the extension from ASN.1 encoded data.
-        /// </summary>
-        public override void CopyFrom(AsnEncodedData asnEncodedData)
-        {
-            if (asnEncodedData == null) throw new ArgumentNullException(nameof(asnEncodedData));
-            Oid = asnEncodedData.Oid;
-            RawData = asnEncodedData.RawData;
-            Decode(RawData);
-        }
         #endregion
 
         #region Public Properties
@@ -132,17 +85,6 @@ namespace Opc.Ua.Security.Certificates
         #endregion
 
         #region Private Methods
-        /// <summary>
-        /// Encode the CRL Number extension.
-        /// </summary>
-        private byte[] Encode()
-        {
-            MemoryStream memoryStream = new MemoryStream();
-            DerSequenceGenerator writer = new DerSequenceGenerator(memoryStream);
-            writer.AddObject(new DerInteger(CrlNumber.ToByteArray()));
-            writer.Close();
-            return memoryStream.ToArray();
-        }
 
         /// <summary>
         /// Decode CRL Number.

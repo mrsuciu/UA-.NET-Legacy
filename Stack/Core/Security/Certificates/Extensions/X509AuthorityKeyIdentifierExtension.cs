@@ -29,10 +29,7 @@
 
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Math;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -55,12 +52,6 @@ namespace Opc.Ua.Security.Certificates
     public class X509AuthorityKeyIdentifierExtension : X509Extension
     {
         #region Constructors
-        /// <summary>
-        /// Creates an empty extension.
-        /// </summary>
-        protected X509AuthorityKeyIdentifierExtension()
-        {
-        }
 
         /// <summary>
         /// Creates an extension from ASN.1 encoded data.
@@ -68,15 +59,6 @@ namespace Opc.Ua.Security.Certificates
         public X509AuthorityKeyIdentifierExtension(AsnEncodedData encodedExtension, bool critical)
         :
             this(encodedExtension.Oid, encodedExtension.RawData, critical)
-        {
-        }
-
-        /// <summary>
-        /// Creates an extension from ASN.1 encoded data.
-        /// </summary>
-        public X509AuthorityKeyIdentifierExtension(string oid, byte[] rawData, bool critical)
-        :
-            this(new Oid(oid, kFriendlyName), rawData, critical)
         {
         }
 
@@ -150,17 +132,6 @@ namespace Opc.Ua.Security.Certificates
             }
             return buffer.ToString();
 
-        }
-
-        /// <summary>
-        /// Initializes the extension from ASN.1 encoded data.
-        /// </summary>
-        public override void CopyFrom(AsnEncodedData asnEncodedData)
-        {
-            if (asnEncodedData == null) throw new ArgumentNullException(nameof(asnEncodedData));
-            base.Oid = asnEncodedData.Oid;
-            base.RawData = asnEncodedData.RawData;
-            Decode(asnEncodedData.RawData);
         }
         #endregion
 

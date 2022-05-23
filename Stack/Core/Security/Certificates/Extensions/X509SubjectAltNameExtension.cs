@@ -75,26 +75,12 @@ namespace Opc.Ua.Security.Certificates
     public class X509SubjectAltNameExtension : X509Extension
     {
         #region Constructors
-        /// <summary>
-        /// Creates an empty extension.
-        /// </summary>
-        protected X509SubjectAltNameExtension()
-        {
-        }
 
         /// <summary>
         /// Creates an extension from ASN.1 encoded data.
         /// </summary>
         public X509SubjectAltNameExtension(AsnEncodedData encodedExtension, bool critical)
             : this(encodedExtension.Oid, encodedExtension.RawData, critical)
-        {
-        }
-
-        /// <summary>
-        /// Creates an extension from an Oid and ASN.1 encoded raw data.
-        /// </summary>
-        public X509SubjectAltNameExtension(string oid, byte[] rawData, bool critical)
-            : this(new Oid(oid, kFriendlyName), rawData, critical)
         {
         }
 
@@ -177,16 +163,6 @@ namespace Opc.Ua.Security.Certificates
             return buffer.ToString();
         }
 
-        /// <summary>
-        /// Initializes the extension from ASN.1 encoded data.
-        /// </summary>
-        public override void CopyFrom(AsnEncodedData asnEncodedData)
-        {
-            if (asnEncodedData == null) throw new ArgumentNullException(nameof(asnEncodedData));
-            Oid = asnEncodedData.Oid;
-            RawData = asnEncodedData.RawData;
-            m_decoded = false;
-        }
         #endregion
 
         #region Public Properties
@@ -241,66 +217,6 @@ namespace Opc.Ua.Security.Certificates
         #endregion
 
         #region Private Methods
-        /// <summary>
-        /// Create a normalized IPv4 or IPv6 address from a 4 byte or 16 byte array.
-        /// </summary>
-        private string IPAddressToString(byte[] encodedIPAddress)
-        {
-            try
-            {
-                IPAddress address = new IPAddress(encodedIPAddress);
-                return address.ToString();
-            }
-            catch
-            {
-                throw new CryptographicException("Certificate contains invalid IP address.");
-            }
-        }
-
-#if NETSTANDARD2_1 || NET472_OR_GREATER || NET5_0_OR_GREATER
-        /// <summary>
-        /// Encode the Subject Alternative name extension.
-        /// </summary>
-        private byte[] Encode()
-        {
-            var sanBuilder = new SubjectAlternativeNameBuilder();
-            foreach (var uri in m_uris)
-            {
-                sanBuilder.AddUri(new Uri(uri));
-            }
-            EncodeGeneralNames(sanBuilder, m_domainNames);
-            EncodeGeneralNames(sanBuilder, m_ipAddresses);
-            var extension = sanBuilder.Build();
-            return extension.RawData;
-        }
-
-        /// <summary>
-        /// Encode a list of general Names in a SAN builder.
-        /// </summary>
-        /// <param name="sanBuilder">The subject alternative name builder</param>
-        /// <param name="generalNames">The general Names to add</param>
-        private void EncodeGeneralNames(SubjectAlternativeNameBuilder sanBuilder, IList<string> generalNames)
-        {
-            foreach (string generalName in generalNames)
-            {
-                IPAddress ipAddr;
-                if (String.IsNullOrWhiteSpace(generalName))
-                {
-                    continue;
-                }
-                if (IPAddress.TryParse(generalName, out ipAddr))
-                {
-                    sanBuilder.AddIpAddress(ipAddr);
-                }
-                else
-                {
-                    sanBuilder.AddDnsName(generalName);
-                }
-            }
-        }
-#else  
-
-#endif
 
         /// <summary>
         /// Decode if RawData is yet undecoded.
@@ -347,34 +263,6 @@ namespace Opc.Ua.Security.Certificates
                 }
             }
             throw new CryptographicException("Invalid SubjectAltNameOid.");
-        }
-
-        /// <summary>
-        /// Initialize the Subject Alternative name extension.
-        /// </summary>
-        /// <param name="applicationUri">The application Uri</param>
-        /// <param name="generalNames">The general names. DNS Hostnames, IPv4 or IPv6 addresses</param>
-        private void Initialize(string applicationUri, IEnumerable<string> generalNames)
-        {
-            List<string> uris = new List<string>();
-            List<string> domainNames = new List<string>();
-            List<string> ipAddresses = new List<string>();
-            uris.Add(applicationUri);
-            foreach (string generalName in generalNames)
-            {
-                switch (Uri.CheckHostName(generalName))
-                {
-                    case UriHostNameType.Dns:
-                        domainNames.Add(generalName); break;
-                    case UriHostNameType.IPv4:
-                    case UriHostNameType.IPv6:
-                        ipAddresses.Add(generalName); break;
-                    default: continue;
-                }
-            }
-            m_uris = uris;
-            m_domainNames = domainNames;
-            m_ipAddresses = ipAddresses;
         }
         #endregion
 
