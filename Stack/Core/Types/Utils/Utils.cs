@@ -30,6 +30,7 @@ using System.IO;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Net;
+using Opc.Ua.Security.Certificates;
 
 namespace Opc.Ua
 {

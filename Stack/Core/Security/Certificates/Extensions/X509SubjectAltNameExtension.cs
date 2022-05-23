@@ -352,40 +352,15 @@ namespace Opc.Ua.Security.Certificates
                     List<string> domainNames = new List<string>();
                     List<string> ipAddresses = new List<string>();
 
-                    Asn1Object obj = Asn1Object.FromByteArray(data);
-                    GeneralNames gnNames = GeneralNames.GetInstance(obj);
-                    if (gnNames != null)
-                    {
-                        foreach (GeneralName generalName in gnNames.GetNames())
-                        {
-                            switch (generalName.TagNo)
-                            {
-                                case (GeneralName.UniformResourceIdentifier):
-                                    {
-                                        var uri = DerIA5String.GetInstance(generalName.Name).GetString();
-                                        uris.Add(uri);
-                                        break;
-                                    }
-                                case (GeneralName.DnsName):
-                                    {
-                                        var dnsName = DerIA5String.GetInstance(generalName.Name).GetString();
-                                        domainNames.Add(dnsName);
-                                        break;
-                                    }
-                                case (GeneralName.IPAddress):
-                                    {
-                                        var ip = DerIA5String.GetInstance(generalName.Name).GetString();
-                                        ipAddresses.Add(ip);
-                                        break;
-                                    }
-                            }
-                        }
-                    }
+                    CertificateFactory.ParseSubjectAltNameUsageExtension(
+                        data,
+                        uris,
+                        domainNames,
+                        ipAddresses);
 
-                    m_uris = uris;
-                    m_domainNames = domainNames;
-                    m_ipAddresses = ipAddresses;
-                    m_decoded = true;
+                    m_uris = new List<string>(uris);
+                    m_domainNames = new List<string>(domainNames);
+                    m_ipAddresses = new List<string>(ipAddresses);
                     return;
                 }
                 catch (Exception ace)
@@ -396,7 +371,6 @@ namespace Opc.Ua.Security.Certificates
             throw new CryptographicException("Invalid SubjectAltNameOid.");
         }
 
-      
         /// <summary>
         /// Initialize the Subject Alternative name extension.
         /// </summary>
