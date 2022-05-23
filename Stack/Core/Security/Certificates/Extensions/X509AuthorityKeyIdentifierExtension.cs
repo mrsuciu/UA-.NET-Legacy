@@ -81,44 +81,6 @@ namespace Opc.Ua.Security.Certificates
         }
 
         /// <summary>
-        /// Build the X509 Authority Key extension.
-        /// </summary>
-        /// <param name="subjectKeyIdentifier">The subject key identifier</param>
-        public X509AuthorityKeyIdentifierExtension(
-            byte[] subjectKeyIdentifier
-            )
-        {
-            if (subjectKeyIdentifier == null) throw new ArgumentNullException(nameof(subjectKeyIdentifier));
-            m_keyIdentifier = subjectKeyIdentifier;
-            base.Oid = new Oid(AuthorityKeyIdentifier2Oid, kFriendlyName);
-            base.Critical = false;
-            base.RawData = Encode();
-        }
-
-        /// <summary>
-        /// Build the X509 Authority Key extension.
-        /// </summary>
-        /// <param name="subjectKeyIdentifier">The subject key identifier as a byte array.</param>
-        /// <param name="authorityName">The distinguished name of the issuer.</param>
-        /// <param name="serialNumber">The serial number of the issuer certificate as little endian byte array.</param>
-        public X509AuthorityKeyIdentifierExtension(
-            byte[] subjectKeyIdentifier,
-            X500DistinguishedName authorityName,
-            byte[] serialNumber
-            )
-        {
-            if (subjectKeyIdentifier == null) throw new ArgumentNullException(nameof(subjectKeyIdentifier));
-            if (authorityName == null) throw new ArgumentNullException(nameof(authorityName));
-            if (serialNumber == null) throw new ArgumentNullException(nameof(serialNumber));
-            m_issuer = authorityName;
-            m_keyIdentifier = subjectKeyIdentifier;
-            m_serialNumberByteArray = serialNumber;
-            base.Oid = new Oid(AuthorityKeyIdentifier2Oid, kFriendlyName);
-            base.Critical = false;
-            base.RawData = Encode();
-        }
-
-        /// <summary>
         /// Creates an extension from ASN.1 encoded data.
         /// </summary>
         public X509AuthorityKeyIdentifierExtension(Oid oid, byte[] rawData, bool critical)
@@ -184,7 +146,7 @@ namespace Opc.Ua.Security.Certificates
 
                 buffer.Append(kSerialNumber);
                 buffer.Append('=');
-                buffer.Append(m_serialNumberByteArray.ToHexString(true));
+                buffer.Append(m_serialNumber);
             }
             return buffer.ToString();
 
@@ -229,15 +191,6 @@ namespace Opc.Ua.Security.Certificates
         public X500DistinguishedName Issuer => m_issuer;
 
         /// <summary>
-        /// The serial number of the authority key as a big endian hexadecimal string.
-        /// </summary>
-        public string SerialNumberHex => m_serialNumberByteArray.ToHexString(true);
-
-        /// <summary>
-        /// The serial number of the authority key as a byte array in little endian order.
-        /// </summary>
-        public byte[] GetSerialNumber() => m_serialNumberByteArray;
-        /// <summary>
         /// A list of distinguished names for the issuer.
         /// </summary>
         /// <summary>
@@ -266,23 +219,6 @@ namespace Opc.Ua.Security.Certificates
         #endregion
 
         #region Private Methods
-        private byte[] Encode()
-        {
-            MemoryStream memoryStream = new MemoryStream();
-            DerSequenceGenerator writer = new DerSequenceGenerator(memoryStream);
-
-            X509Name issuerName = new X509Name(m_issuer.Name);
-
-            AuthorityKeyIdentifier authorityKeyIdentifier = new AuthorityKeyIdentifier(
-                m_keyIdentifier,
-                GeneralNames.GetInstance(new DerSequence(issuerName)),
-                new BigInteger(m_serialNumberByteArray));
-
-            writer.AddObject(authorityKeyIdentifier);
-            writer.Close();
-            return memoryStream.ToArray();
-        }
-
 
         private void Decode(byte[] data)
         {
@@ -340,10 +276,6 @@ namespace Opc.Ua.Security.Certificates
                         {
                             m_issuer = new X500DistinguishedName(authorityKeyIdentifier.AuthorityCertIssuer.GetDerEncoded());
                         }
-                        if (authorityKeyIdentifier.AuthorityCertSerialNumber != null)
-                        {
-                            m_serialNumberByteArray = authorityKeyIdentifier.AuthorityCertSerialNumber.ToByteArray();
-                        }
                         return;
                     }
                     else
@@ -376,7 +308,6 @@ namespace Opc.Ua.Security.Certificates
         private const string kFriendlyName = "Authority Key Identifier";
         private byte[] m_keyIdentifier;
         private X500DistinguishedName m_issuer;
-        private byte[] m_serialNumberByteArray;
         #endregion
     }
 }

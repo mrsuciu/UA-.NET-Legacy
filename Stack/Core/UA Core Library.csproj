@@ -133,15 +133,11 @@
     <Compile Include="Security\Certificates\ICertificate.cs" />
     <Compile Include="Security\Certificates\ICertificateStore.cs" />
     <Compile Include="Security\Certificates\ICertificateValidator.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\X509Extensions.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\X509SignatureFactory.cs" />
-    <Compile Include="Security\Certificates\Org.BouncyCastle\X509Utils.cs" />
     <Compile Include="Security\Certificates\RsaUtils.cs" />
     <Compile Include="Security\Certificates\SecurityConfiguration.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Security\AccessControl\AccessTemplateManager.cs" />
-    <Compile Include="Security\Certificates\System.Security.Cryptography.X509Certificates\X509SignatureGenerator.cs" />
     <Compile Include="Security\Certificates\Win32.cs" />
     <Compile Include="Security\Certificates\WindowsCertificateStore.cs" />
     <Compile Include="Security\Certificates\X509CRL.cs" />
