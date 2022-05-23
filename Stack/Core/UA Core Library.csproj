@@ -125,9 +125,6 @@
     <Compile Include="Security\Certificates\Common\AsnUtils.cs" />
     <Compile Include="Security\Certificates\Common\HashAlgorithmName.cs" />
     <Compile Include="Security\Certificates\Common\Oids.cs" />
-    <Compile Include="Security\Certificates\Common\RSASignaturePadding.cs" />
-    <Compile Include="Security\Certificates\Common\RSASignaturePaddingMode.cs" />
-    <Compile Include="Security\Certificates\Common\X509Defaults.cs" />
     <Compile Include="Security\Certificates\DirectoryCertificateStore.cs" />
     <Compile Include="Security\Certificates\EncryptedData.cs" />
     <Compile Include="Security\Certificates\ICertificate.cs" />

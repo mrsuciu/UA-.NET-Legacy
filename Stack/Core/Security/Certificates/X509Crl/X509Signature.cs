@@ -113,13 +113,11 @@ namespace Opc.Ua.Security.Certificates
                 case Oids.RsaPkcs1Sha256:
                 case Oids.RsaPkcs1Sha384:
                 case Oids.RsaPkcs1Sha512:
-                    return VerifyForRSA(certificate, RSASignaturePadding.Pkcs1);
-
                 case Oids.ECDsaWithSha1:
                 case Oids.ECDsaWithSha256:
                 case Oids.ECDsaWithSha384:
                 case Oids.ECDsaWithSha512:
-                    return VerifyForECDsa(certificate);
+                    return VerifySignature(certificate);
 
                 default:
                     throw new CryptographicException("Failed to verify signature due to unknown signature algorithm.");
@@ -129,7 +127,7 @@ namespace Opc.Ua.Security.Certificates
         /// <summary>
         /// Verify the signature with the RSA public key of the signer.
         /// </summary>
-        private bool VerifyForRSA(X509Certificate2 certificate, RSASignaturePadding padding)
+        private bool VerifySignature(X509Certificate2 certificate)
         {
             try
             {
@@ -140,23 +138,6 @@ namespace Opc.Ua.Security.Certificates
             catch (Exception e)
             {
                 throw new CryptographicException("Failed to verify RSA signature.", e);
-            }
-        }
-
-        /// <summary>
-        /// Verify the signature with the ECC public key of the signer.
-        /// </summary>
-        private bool VerifyForECDsa(X509Certificate2 certificate)
-        {
-            try
-            {
-                Org.BouncyCastle.X509.X509Certificate cert = new Org.BouncyCastle.X509.X509Certificate(certificate.RawData);
-                cert.Verify(cert.GetPublicKey());
-                return true;
-            }
-            catch (Exception e)
-            {
-                throw new CryptographicException("Failed to verify ECD signature.", e);
             }
         }
 
