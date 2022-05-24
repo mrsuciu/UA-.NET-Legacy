@@ -2919,7 +2919,7 @@ namespace Opc.Ua
         public static bool CompareDistinguishedName(string name1, string name2)
         {
             // check for simple equality.
-            if (String.Compare(name1, name2, StringComparison.OrdinalIgnoreCase) == 0)
+            if (String.Compare(name1, name2, StringComparison.Ordinal) == 0)
             {
                 return true;
             }
@@ -2963,7 +2963,7 @@ namespace Opc.Ua
             // compare each.
             for (int ii = 0; ii < parsedName.Count; ii++)
             {
-                if (String.Compare(parsedName[ii], certificateName[ii], StringComparison.OrdinalIgnoreCase) != 0)
+                if (String.Compare(parsedName[ii], certificateName[ii], StringComparison.Ordinal) != 0)
                 {
                     return false;
                 }
