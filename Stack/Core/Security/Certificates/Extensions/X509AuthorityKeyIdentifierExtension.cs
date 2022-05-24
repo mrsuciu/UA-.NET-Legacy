@@ -27,8 +27,6 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -193,72 +191,72 @@ namespace Opc.Ua.Security.Certificates
 
         private void Decode(byte[] data)
         {
-
-            #region Legacy Property holders
-            byte[] keyId;
-            byte[] serialNumber;
-
-            if (base.Oid.Value == AuthorityKeyIdentifierOid)
-            {
-                CertificateFactory.ParseAuthorityKeyIdentifierExtension(
-                    data,
-                    out keyId,
-                    out m_authorityNames,
-                    out serialNumber);
-            }
-            else
-            {
-                CertificateFactory.ParseAuthorityKeyIdentifierExtension2(
-                    data,
-                    out keyId,
-                    out m_authorityNames,
-                    out serialNumber);
-            }
-
-            m_keyId = Utils.ToHexString(keyId);
-            m_serialNumber = null;
-
-            // the serial number is a little endian integer so must convert to string in reverse order. 
-            if (serialNumber != null)
-            {
-                StringBuilder builder = new StringBuilder(serialNumber.Length * 2);
-
-                for (int ii = serialNumber.Length - 1; ii >= 0; ii--)
-                {
-                    builder.AppendFormat("{0:X2}", serialNumber[ii]);
-                }
-
-                m_serialNumber = builder.ToString();
-            }
-
-            #endregion
-
             if (base.Oid.Value == AuthorityKeyIdentifierOid ||
                 base.Oid.Value == AuthorityKeyIdentifier2Oid)
             {
                 try
                 {
-                    Asn1Object obj = Asn1Object.FromByteArray(data);
-                    AuthorityKeyIdentifier authorityKeyIdentifier = AuthorityKeyIdentifier.GetInstance(obj);
-                    if (authorityKeyIdentifier != null)
+                    #region Legacy Property holders
+                    byte[] keyId;
+                    byte[] serialNumber;
+
+                    if (base.Oid.Value == AuthorityKeyIdentifierOid)
                     {
-                        m_keyIdentifier = authorityKeyIdentifier.GetKeyIdentifier();
-                        if (authorityKeyIdentifier.AuthorityCertIssuer != null)
-                        {
-                            m_issuer = new X500DistinguishedName(authorityKeyIdentifier.AuthorityCertIssuer.GetDerEncoded());
-                        }
-                        return;
+                        CertificateFactory.ParseAuthorityKeyIdentifierExtension(
+                            data,
+                            out keyId,
+                            out m_authorityNames,
+                            out serialNumber);
                     }
                     else
                     {
-                        throw new CryptographicException("Failed to decode the AuthorityKeyIdentifier extention; No valid data");
+                        CertificateFactory.ParseAuthorityKeyIdentifierExtension2(
+                            data,
+                            out keyId,
+                            out m_authorityNames,
+                            out serialNumber);
                     }
+
+                    m_keyId = Utils.ToHexString(keyId);
+                    m_serialNumber = null;
+                    
+
+                    // the serial number is a little endian integer so must convert to string in reverse order. 
+                    if (serialNumber != null)
+                    {
+                        StringBuilder builder = new StringBuilder(serialNumber.Length * 2);
+
+                        for (int ii = serialNumber.Length - 1; ii >= 0; ii--)
+                        {
+                            builder.AppendFormat("{0:X2}", serialNumber[ii]);
+                        }
+
+                        m_serialNumber = builder.ToString();
+                    }
+
+                    #endregion
+                    m_keyIdentifier = keyId;
+
+                    if (m_authorityNames != null)
+                    {
+                        StringBuilder builder = new StringBuilder();
+
+                        for (int ii = m_authorityNames.Length - 1; ii >= 0; ii--)
+                        {
+                            builder.Append(m_authorityNames[ii]);
+                        }
+
+                        m_issuer = new X500DistinguishedName(builder.ToString());
+                    }
+
+                    return;
                 }
                 catch (Exception ace)
                 {
                     throw new CryptographicException("Failed to decode the AuthorityKeyIdentifier extension.", ace);
                 }
             }
+            throw new CryptographicException("Failed to decode the AuthorityKeyIdentifier extention; No valid data");
         }
         #endregion
 

@@ -28,9 +28,8 @@
  * ======================================================================*/
 
 using Opc.Ua.Security.Certificates.Common;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
 using System;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -76,27 +75,45 @@ namespace Opc.Ua.Security.Certificates
         /// <param name="crl">The encoded CRL or certificate sequence.</param>
         private void Decode(byte[] crl)
         {
+            int bufferSize = crl.Length;
+            IntPtr pBuffer = Marshal.AllocHGlobal(bufferSize);
+
             try
             {
-                X509CertificateStructure x509CertificateStructure = X509CertificateStructure.GetInstance(crl);
-                if (x509CertificateStructure != null)
+                
+                Marshal.Copy(crl, 0, pBuffer, bufferSize);
+
+                Win32.CERT_SIGNED_CONTENT_INFO signedCrl = Win32.Decode_CERT_SIGNED_CONTENT_INFO(pBuffer, crl.Length);
+
+                if (signedCrl.ToBeSigned.pbData != IntPtr.Zero)
                 {
                     // Tbs encoded data
-                    Tbs = x509CertificateStructure.TbsCertificate.GetEncoded();
+                    Tbs = new byte[signedCrl.ToBeSigned.cbData];
+                    Marshal.Copy(signedCrl.ToBeSigned.pbData, Tbs, 0, signedCrl.ToBeSigned.cbData);
 
                     // Signature Algorithm Identifier
-                    SignatureAlgorithm = x509CertificateStructure.SignatureAlgorithm.Algorithm.ToString();
+                    SignatureAlgorithm = signedCrl.SignatureAlgorithm.pszObjId;
                     Name = Oids.GetHashAlgorithmName(SignatureAlgorithm);
 
                     //Signature
-                    Signature = x509CertificateStructure.GetSignatureOctets();
+                    Signature = new byte[signedCrl.Signature.cbData];
+                    Marshal.Copy(signedCrl.Signature.pbData, Signature, 0, signedCrl.Signature.cbData);
+
                     return;
                 }
+
                 throw new CryptographicException("No valid data in the X509 signature.");
             }
             catch (CryptographicException ace)
             {
                 throw new CryptographicException("Failed to decode the X509 signature.", ace);
+            }
+            finally
+            {
+                if (pBuffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(pBuffer);
+                }
             }
         }
 
@@ -125,21 +142,41 @@ namespace Opc.Ua.Security.Certificates
         }
 
         /// <summary>
-        /// Verify the signature with the RSA public key of the signer.
+        /// Verifies the signature on the CRL or certificate.
         /// </summary>
         private bool VerifySignature(X509Certificate2 certificate)
         {
+         
+            byte[] certBytes = certificate.GetRawCertData();
+            int bufferSize = certBytes.Length;
+            IntPtr pBuffer = Marshal.AllocHGlobal(bufferSize);
+            Marshal.Copy(certBytes, 0, pBuffer, bufferSize);
+
             try
             {
-                Org.BouncyCastle.X509.X509Certificate cert = new Org.BouncyCastle.X509.X509Certificate(certificate.RawData);
-                cert.Verify(cert.GetPublicKey());
-                return true;
-            }
-            catch (Exception e)
-            {
-                throw new CryptographicException("Failed to verify RSA signature.", e);
-            }
-        }
+                Win32.CERT_CONTEXT context = (Win32.CERT_CONTEXT)Marshal.PtrToStructure(certificate.Handle, typeof(Win32.CERT_CONTEXT));
+                Win32.CERT_INFO info = (Win32.CERT_INFO)Marshal.PtrToStructure(context.pCertInfo, typeof(Win32.CERT_INFO));
 
+                int bResult = Win32.CryptVerifyCertificateSignature(
+                    IntPtr.Zero,
+                    Win32.X509_ASN_ENCODING,
+                    pBuffer,
+                    bufferSize,
+                    ref info.SubjectPublicKeyInfo);
+
+                if (bResult == 0)
+                {
+                    throw new CryptographicException("Failed to verify signature due to unknown signature algorithm.");
+                }
+            }
+            finally
+            {
+                if (pBuffer != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(pBuffer);
+                }
+            }
+            return true;
+        }
     }
 }
