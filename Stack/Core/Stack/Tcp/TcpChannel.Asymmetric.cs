@@ -1126,7 +1126,7 @@ namespace Opc.Ua.Bindings
             // validate the sender certificate.
             if (senderCertificate != null && Quotas.CertificateValidator != null && securityPolicyUri != SecurityPolicies.None)
             {
-                (Quotas.CertificateValidator as Opc.Ua.CertificateValidator.WcfValidatorWrapper).Validate(senderCertificateChain);
+                (Quotas.CertificateValidator as Opc.Ua.CertificateValidator2.WcfValidatorWrapper).Validate(senderCertificateChain);
                 //Quotas.CertificateValidator.Validate(senderCertificate);
             }
                  

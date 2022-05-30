@@ -117,7 +117,7 @@ namespace Opc.Ua
         /// <remarks>
         /// If the configuration is changed the CertificateValidator.Update method must be called.
         /// </remarks>
-        public CertificateValidator CertificateValidator
+        public CertificateValidator2 CertificateValidator
         {
             get { return m_certificateValidator;  }
             set { m_certificateValidator = value; }
@@ -572,7 +572,7 @@ namespace Opc.Ua
 
             #if !SILVERLIGHT
             // create the certificate validator.
-            m_certificateValidator = new CertificateValidator();
+            m_certificateValidator = new CertificateValidator2();
             m_certificateValidator.Update(this.SecurityConfiguration);
             #endif
         }

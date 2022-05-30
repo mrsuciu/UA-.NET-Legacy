@@ -1291,7 +1291,7 @@ namespace Opc.Ua.Configuration
         /// Uses the UA validation logic for HTTPS certificates.
         /// </summary>
         /// <param name="validator">The validator.</param>
-        public static void SetUaValidationForHttps(CertificateValidator validator)
+        public static void SetUaValidationForHttps(CertificateValidator2 validator)
         {
             m_validator = validator;
             System.Net.ServicePointManager.ServerCertificateValidationCallback = HttpsCertificateValidation;
@@ -1318,14 +1318,14 @@ namespace Opc.Ua.Configuration
             }
         }
 
-        private static CertificateValidator m_validator;
+        private static CertificateValidator2 m_validator;
         #endregion
 
         #region Private Methods
         /// <summary>
         /// Handles a certificate validation error.
         /// </summary>
-        private static void CertificateValidator_CertificateValidation(CertificateValidator validator, CertificateValidationEventArgs e)
+        private static void CertificateValidator_CertificateValidation(CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {
             try
             {

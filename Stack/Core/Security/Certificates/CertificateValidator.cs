@@ -14,6 +14,7 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
+using Opc.Ua.Security.Certificates;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

@@ -2281,7 +2281,7 @@ namespace Opc.Ua.Client
 				}
 
 				// get a validator to check certificates provided by server.
-				CertificateValidator validator = m_configuration.CertificateValidator;
+				CertificateValidator2 validator = m_configuration.CertificateValidator;
 
 				// validate software certificates.
 				List<SoftwareCertificate> softwareCertificates = new List<SoftwareCertificate>();

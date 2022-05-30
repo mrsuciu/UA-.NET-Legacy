@@ -2161,8 +2161,8 @@ namespace Opc.Ua.Server
         public bool RegisterWithDiscoveryServer()
         {
             ApplicationConfiguration configuration = string.IsNullOrEmpty(base.Configuration.SourceFilePath) ? base.Configuration : ApplicationConfiguration.Load(new FileInfo(base.Configuration.SourceFilePath), ApplicationType.Server, null, false);
-            CertificateValidationEventHandler registrationCertificateValidator = new CertificateValidationEventHandler(RegistrationValidator_CertificateValidation);
-            configuration.CertificateValidator.CertificateValidation += registrationCertificateValidator;            
+            CertificateValidationEventHandler2 registrationCertificateValidator = new CertificateValidationEventHandler2(RegistrationValidator_CertificateValidation);
+            //configuration.CertificateValidator.CertificateValidation += registrationCertificateValidator;            
 
             try
             {
@@ -2262,7 +2262,7 @@ namespace Opc.Ua.Server
         /// <summary>
         /// Checks that the domains in the certificate match the current host.
         /// </summary>
-        private void RegistrationValidator_CertificateValidation(CertificateValidator sender, CertificateValidationEventArgs e)
+        private void RegistrationValidator_CertificateValidation(CertificateValidator2 sender, CertificateValidationEventArgs2 e)
         {
             System.Net.IPAddress[] targetAddresses = System.Net.Dns.GetHostAddresses(System.Net.Dns.GetHostName());
             

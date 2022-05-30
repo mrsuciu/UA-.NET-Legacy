@@ -63,7 +63,7 @@ namespace Opc.Ua.ServerTest
                 GuiUtils.DisplayUaTcpImplementation(this, m_configuration);
             }
 
-            m_configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler(CertificateValidator_CertificateValidation);
+            m_configuration.CertificateValidator.CertificateValidation += new CertificateValidationEventHandler2(CertificateValidator_CertificateValidation);
             m_testConfiguration = ServerTestConfiguration.Load(m_configuration.Extensions);
 
             // allow UA servers to use the same certificate for HTTPS validation.
@@ -85,7 +85,7 @@ namespace Opc.Ua.ServerTest
         /// <summary>
         /// Accepts server certificates.
         /// </summary>
-        void CertificateValidator_CertificateValidation(CertificateValidator validator, CertificateValidationEventArgs e)
+        void CertificateValidator_CertificateValidation(CertificateValidator2 validator, CertificateValidationEventArgs2 e)
         {
             // always safe to trust servers when connecting as a test application.
             e.Accept = true;

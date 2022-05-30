@@ -77,7 +77,7 @@ namespace Opc.Ua.Server
             ServerProperties                     serverDescription, 
             ApplicationConfiguration             configuration,
             ServiceMessageContext                messageContext,
-            CertificateValidator                 certificateValidator,
+            CertificateValidator2                certificateValidator,
             X509Certificate2                     instanceCertificate)
         {
             m_serverDescription = serverDescription;

@@ -258,7 +258,7 @@ namespace Opc.Ua
 
 #if !SILVERLIGHT
         private ServiceMessageContext m_messageContext;
-        private CertificateValidator m_certificateValidator;
+        private CertificateValidator2 m_certificateValidator;
 #endif
         #endregion
     }

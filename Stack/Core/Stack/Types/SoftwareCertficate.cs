@@ -43,7 +43,7 @@ namespace Opc.Ua
         /// Validates a software certificate.
         /// </summary>
         public static ServiceResult Validate(
-            CertificateValidator validator,
+            CertificateValidator2 validator,
             byte[] signedCertificate, 
             out SoftwareCertificate softwareCertificate)
         {
