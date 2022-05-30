@@ -153,7 +153,6 @@ namespace Opc.Ua
 
                 if (rejectedCertificateStore != null)
                 {
-                    Object o = new object();
                     m_rejectedCertificateStore = (CertificateStoreIdentifier)rejectedCertificateStore.MemberwiseClone();
                 }
             }
@@ -188,29 +187,6 @@ namespace Opc.Ua
             }
         }
 
-        /// <summary>
-        /// Updates the validator with a new application certificate.
-        /// </summary>
-        //public virtual async Task UpdateCertificate(SecurityConfiguration securityConfiguration)
-        //{
-        //    lock (m_lock)
-        //    {
-        //        securityConfiguration.ApplicationCertificate.Certificate = null;
-        //    }
-
-        //    await securityConfiguration.ApplicationCertificate.LoadPrivateKeyEx(
-        //        securityConfiguration.CertificatePasswordProvider).ConfigureAwait(false);
-        //    Update(securityConfiguration);
-
-        //    lock (m_callbackLock)
-        //    {
-        //        if (m_CertificateUpdate != null)
-        //        {
-        //            var args = new CertificateUpdateEventArgs(securityConfiguration, GetChannelValidator());
-        //            m_CertificateUpdate(this, args);
-        //        }
-        //    }
-        //}
 
         /// <summary>
         /// Reset the list of validated certificates.
