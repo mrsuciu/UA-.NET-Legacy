@@ -1,43 +1,29 @@
-/* ========================================================================
- * Copyright (c) 2005-2020 The OPC Foundation, Inc. All rights reserved.
- *
- * OPC Foundation MIT License 1.00
- * 
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
- * 
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- *
- * The complete license agreement can be found here:
- * http://opcfoundation.org/License/MIT/1.00/
- * ======================================================================*/
+﻿/* Copyright (c) 1996-2017, OPC Foundation. All rights reserved.
+
+   The source code in this file is covered under a dual-license scenario:
+     - RCL: for OPC Foundation members in good-standing
+     - GPL V2: everybody else
+
+   RCL license terms accompanied with this source code. See http://opcfoundation.org/License/RCL/1.00/
+
+   GNU General Public License as published by the Free Software Foundation;
+   version 2 of the License are accompanied with this source code. See http://opcfoundation.org/License/GPLv2
+
+   This source code is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
 
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using X509Extension = System.Security.Cryptography.X509Certificates.X509Extension;
 
-namespace Opc.Ua.Security.Certificates
+namespace Opc.Ua
 {
     /// <summary>
-    /// The subject alternate name extension.
+    /// Stores the subject alternate name extension.
     /// </summary>
     /// <remarks>
     /// 
@@ -73,12 +59,28 @@ namespace Opc.Ua.Security.Certificates
     public class X509SubjectAltNameExtension : X509Extension
     {
         #region Constructors
+        /// <summary>
+        /// Creates an empty extension.
+        /// </summary>
+        protected X509SubjectAltNameExtension()
+        {
+        }
 
         /// <summary>
         /// Creates an extension from ASN.1 encoded data.
         /// </summary>
         public X509SubjectAltNameExtension(AsnEncodedData encodedExtension, bool critical)
-            : this(encodedExtension.Oid, encodedExtension.RawData, critical)
+        :
+            this(encodedExtension.Oid, encodedExtension.RawData, critical)
+        {
+        }
+
+        /// <summary>
+        /// Creates an extension from ASN.1 encoded data.
+        /// </summary>
+        public X509SubjectAltNameExtension(string oid, byte[] rawData, bool critical)
+        :
+            this(new Oid(oid, s_FriendlyName), rawData, critical)
         {
         }
 
@@ -161,29 +163,44 @@ namespace Opc.Ua.Security.Certificates
             return buffer.ToString();
         }
 
+        /// <summary>
+        /// Initializes the extension from ASN.1 encoded data.
+        /// </summary>
+        public override void CopyFrom(AsnEncodedData asnEncodedData)
+        {
+            if (asnEncodedData == null) throw new ArgumentNullException("asnEncodedData");
+            this.Oid = asnEncodedData.Oid;
+            Decode(asnEncodedData.RawData);
+        }
         #endregion
 
         #region Public Properties
         /// <summary>
         /// The OID for a Subject Alternate Name extension.
         /// </summary>
-        public const string SubjectAltNameOid = "2.5.29.7";
+        public static string SubjectAltNameOid
+        {
+            get { return s_SubjectAltNameOid; }
+        }
 
         /// <summary>
         /// The OID for a Subject Alternate Name 2 extension.
         /// </summary>
-        public const string SubjectAltName2Oid = "2.5.29.17";
+        public static string SubjectAltName2Oid
+        {
+            get { return s_SubjectAltName2Oid; }
+        }
 
         /// <summary>
         /// Gets the uris.
         /// </summary>
         /// <value>The uris.</value>
-        public IReadOnlyList<string> Uris
+        public ReadOnlyList<string> Uris
         {
-            get
+            get 
             {
                 EnsureDecoded();
-                return m_uris.AsReadOnly();
+                return m_uris; 
             }
         }
 
@@ -191,12 +208,12 @@ namespace Opc.Ua.Security.Certificates
         /// Gets the domain names.
         /// </summary>
         /// <value>The domain names.</value>
-        public IReadOnlyList<string> DomainNames
+        public ReadOnlyList<string> DomainNames
         {
-            get
+            get 
             {
                 EnsureDecoded();
-                return m_domainNames.AsReadOnly();
+                return m_domainNames; 
             }
         }
 
@@ -204,12 +221,12 @@ namespace Opc.Ua.Security.Certificates
         /// Gets the IP addresses.
         /// </summary>
         /// <value>The IP addresses.</value>
-        public IReadOnlyList<string> IPAddresses
+        public ReadOnlyList<string> IPAddresses
         {
-            get
+            get 
             {
                 EnsureDecoded();
-                return m_ipAddresses.AsReadOnly();
+                return m_ipAddresses;
             }
         }
         #endregion
@@ -250,9 +267,9 @@ namespace Opc.Ua.Security.Certificates
                         domainNames,
                         ipAddresses);
 
-                    m_uris = new List<string>(uris);
-                    m_domainNames = new List<string>(domainNames);
-                    m_ipAddresses = new List<string>(ipAddresses);
+                    m_uris = new ReadOnlyList<string>(uris);
+                    m_domainNames = new ReadOnlyList<string>(domainNames);
+                    m_ipAddresses = new ReadOnlyList<string>(ipAddresses);
                     return;
                 }
                 catch (Exception ace)
@@ -265,17 +282,16 @@ namespace Opc.Ua.Security.Certificates
         #endregion
 
         #region Private Fields
-        /// <summary>
-        /// Subject Alternate Name extension string
-        /// definitions see RFC 5280 4.2.1.7
-        /// </summary>
+        private const string s_SubjectAltNameOid = "2.5.29.7";
+        private const string s_SubjectAltName2Oid = "2.5.29.17";
+        private const string s_FriendlyName = "Subject Alternative Name";
+        private ReadOnlyList<string> m_uris;
+        private ReadOnlyList<string> m_domainNames;
+        private ReadOnlyList<string> m_ipAddresses;
+
         private const string kUniformResourceIdentifier = "URL";
         private const string kDnsName = "DNS Name";
         private const string kIpAddress = "IP Address";
-        private const string kFriendlyName = "Subject Alternative Name";
-        private List<string> m_uris;
-        private List<string> m_domainNames;
-        private List<string> m_ipAddresses;
         private bool m_decoded;
         #endregion
     }
